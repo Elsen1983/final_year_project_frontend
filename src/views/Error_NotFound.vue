@@ -1,6 +1,20 @@
 <template>
-    <div class="error_notfound">
-        <h1>This is an error (not found) page</h1>
+    <div class="container">
+        <div class="page-wrap d-flex flex-row align-items-center">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-12 text-center">
+                        <span class="display-1 d-block">
+                            404
+                        </span>
+                        <div class="mb-4 lead">
+                            Oops! We can't seem to find the page you are looking for.
+                        </div>
+                        <a href="/" class="btn btn-link">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
