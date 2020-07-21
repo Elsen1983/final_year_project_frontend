@@ -6,7 +6,8 @@ import Profile from '../views/Profile.vue'
 import Detail from '../views/Detail.vue'
 import NotFound from '../views/Error_NotFound.vue'
 import Unauthorized from '../views/Error_Unauthorized.vue'
-import Role from './models/role'
+import Role from '../models/role'
+import UserService from '../services/user.service'
 
 Vue.use(VueRouter)
 
@@ -56,10 +57,27 @@ const routes = [
 
 ]
 
+
 const router = new VueRouter({
     mode: 'history',
     base: process.env.BASE_URL,
     routes
-})
+});
+
+router.beforeEach((to, from, next) => {
+    const { roles } = to.meta;
+    const currentUser = UserService.currentUserValue;
+
+    if (roles) {
+        if (!currentUser) {
+            return next({ path: '/login' });
+        }
+
+        if (roles.length && !roles.includes(currentUser.role)) {
+            return next({ path: '/401' });
+        }
+    }
+    next();
+});
 
 export default router
