@@ -18,14 +18,17 @@ const routes = [
         component: Login
     },
     {
-        path: '/',
-        name: 'register',
+        path: '/login',
+        component: Login
+    },
+    {
+        path: '/register',
         component: Register
     },
     {
-        path: '/',
-        name: 'profile',
-        component: Profile
+        path: '/profile',
+        component: Profile,
+        meta: { roles: [Role.ADMIN, Role.USER] }
     },
     //Only admin can see it.
     {
@@ -41,7 +44,8 @@ const routes = [
         //use router with parameter
         path: '/',
         name: 'detail',
-        component: Detail
+        component: Detail,
+        meta: { roles: [Role.ADMIN] }
     },
     {
         path: '/404',
