@@ -46,6 +46,22 @@ class UserService {
         );
     }
 
+    logOut(){
+        return axios.post(API_URL + "logout", {}).then(
+            ()=> {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('currentUserBasicData');
+                localStorage.removeItem('currentUser_visualizationData');
+                currentUserSubject.next(null);
+            }
+        );
+    }
+
+    register(user) {
+        return axios.post(API_URL + 'registration', JSON.stringify(user),
+            {headers: {'Content-Type':'application/json; charset=UTF-8'}});
+    }
+
     userBasicData(user){
         //console.log(user)
         const headers = {
@@ -83,7 +99,10 @@ class UserService {
         console.log('Basic ' + btoa(user.username + ':' + user.password))
         const method = 'get'
         const url = API_URL + 'visualization';
-        const params = {username: user.username, type: validationType};
+        const params = {
+            username: user.username,
+            type: validationType
+        };
         const headers = {
             authorization: 'Basic ' + btoa(user.username + ':' + user.password)
         };
@@ -95,6 +114,7 @@ class UserService {
                 params: params,
                 headers: headers
             }
+            console.log(config)
 
             let res = await axios(config).then( response => {
                     console.log("userVisData -- response: " + JSON.stringify(response.data));
@@ -128,21 +148,7 @@ class UserService {
 
 
 
-    logOut(){
-        return axios.post(API_URL + "logout", {}).then(
-            ()=> {
-                localStorage.removeItem('currentUser');
-                localStorage.removeItem('currentUserBasicData');
-                localStorage.removeItem('currentUser_visualizationData');
-                currentUserSubject.next(null);
-            }
-        );
-    }
 
-    register(user) {
-        return axios.post(API_URL + 'registration', JSON.stringify(user),
-            {headers: {'Content-Type':'application/json; charset=UTF-8'}});
-    }
 
 
 }

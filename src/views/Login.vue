@@ -48,7 +48,6 @@
         },
         mounted() {
             if(UserService.currentUserValue) {
-                //this.$router.push('/profile');
                 this.$router.push('/userdata');
             }
         },

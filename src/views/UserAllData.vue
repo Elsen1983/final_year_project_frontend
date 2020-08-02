@@ -114,7 +114,6 @@
         data() {
             return {
                 currentUser: new User('','','','',''),
-
                 currentUserBasicData: [],
                 //theme
                 show: false,
@@ -122,7 +121,6 @@
                 themeSelector:'0',
                 styleRoute: "../assets/style/lightTheme.css",
                 //
-
                 getData: '',
                 //date selection
                 dateFrom: undefined,
@@ -136,24 +134,12 @@
                 selectedObjectsBeforeActionTypeSelection: [],
                 //selected objects from 'currentUserBasicData'
                 selectedObjectsAfterSearch: [],
-
                 //submit
                 submit: false,
                 currentUserVisualizationData:[]
-
             };
         },
         computed: {
-            // isDisabledDate: function(){
-            //     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-            //     this.dateFrom = undefined; this.dateTo = undefined;
-            //     return this.allDateButtonStatus;
-            // },
-            // isDisabledAction: function(){
-            //     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-            //     this.actionType = undefined;
-            //     return this.allActionButtonStatus;
-            // }
         },
         created() {
             this.currentUser = UserService.currentUserValue;
@@ -169,14 +155,11 @@
             if(this.currentUserBasicData !== null) {
                 console.log("Setup all dates for selection");
                 this.setupAllDate();
-                //console.log("Setup all action for ALL button");
-                //this.setupValidActionForAll();
             }else{
                 this.logOut();
             }
         },
         mounted() {
-
         },
         methods: {
             logOut() {
@@ -190,14 +173,12 @@
                 }else{
                     document.getElementById('actionSelector').setAttribute("disabled", "disabled");
                 }
-
                 if(this.timeSelectTo !== undefined && this.timeSelectTo.length !== 0){
                     document.getElementById('dateToSelector').removeAttribute("disabled");
                 }
                 else{
                     document.getElementById('dateToSelector').setAttribute("disabled", "disabled");
                 }
-
             },
             //methods for the changing of the page elements
             onchangeTheme(){
@@ -357,21 +338,10 @@
             },
 
             submitSearch(){
-                // this.submit = true;
-                // this.$validator.validateAll();
-                // if(this.errors.any()) {
-                //     this.submit = false;
-                //     //return;
-                // }
 
                 console.log(this.currentUser.name)
                 console.log(this.currentUser.password)
                 console.log(this.currentUser.token)
-
-                // this.headers = {
-                //     'Content-Type':'application/json',
-                //     'authorization':'Bearer ' + (token ? data.token:'')
-                // };
 
                // let us = new User(this.currentUser.username,this.currentUser.password,this.currentUser.name,this.currentUser.role,this.currentUser.token,this.currentUser.id)
                 UserService.userVisualizationData(this.currentUser,'validation');
