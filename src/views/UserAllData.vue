@@ -65,7 +65,7 @@
                                         <b-col cols="4">
                                             <template>
                                                 <div>
-                                                    <b-form-select id="actionSelector" v-model="actionType" :options="actionTypeList" class="form-control form-control-sm"></b-form-select>
+                                                    <b-form-select id="actionSelector" @change="onchangeAction()" v-model="actionType" :options="actionTypeList" class="form-control form-control-sm"></b-form-select>
                                                     <option :value="undefined" disabled style="display:none">Select type of action</option>
                                                     <div class="mt-3">Selected: <strong>{{ actionType }}</strong></div>
                                                 </div>
@@ -73,7 +73,7 @@
                                         </b-col>
                                     </b-row>
 
-                                        <button class="btn btn-primary btn-block" :disabled="submit"><span class="spinner-border spinner-border-sm" v-show="submit"></span>
+                                        <button id="submitSearchBTN" class="btn btn-primary btn-block" disabled><span class="spinner-border spinner-border-sm" v-show="submit"></span>
                                             <span>Submit Search</span>
                                         </button>
 
@@ -135,7 +135,7 @@
                 //selected objects from 'currentUserBasicData'
                 selectedObjectsAfterSearch: [],
                 //submit
-                submit: false,
+                submit: '',
                 currentUserVisualizationData:[]
             };
         },
@@ -336,39 +336,22 @@
 
                 //this.actionTypeList = [... allAction];
             },
-
+            onchangeAction(){
+              this.makeSubmitAvailable(this.actionType)
+            },
+            makeSubmitAvailable(action){
+                console.log(action)
+                document.getElementById('submitSearchBTN').removeAttribute('disabled');
+            },
             submitSearch(){
 
-                console.log(this.currentUser.name)
-                console.log(this.currentUser.password)
-                console.log(this.currentUser.token)
+                // console.log(this.currentUser.name)
+                // console.log(this.currentUser.password)
+                // console.log(this.currentUser.token)
 
                // let us = new User(this.currentUser.username,this.currentUser.password,this.currentUser.name,this.currentUser.role,this.currentUser.token,this.currentUser.id)
                 UserService.userVisualizationData(this.currentUser,'validation');
-                //     .then(
-                //     data => {
-                //         console.log(data);
-                //     },
-                //     error => {
-                //         console.log(error);
-                //         this.$store.dispatch('error', 'Username or password is not valid.');
-                //         this.loading = false;
-                //     }
-                // );
-                //     .then(
-                //     // eslint-disable-next-line no-unused-vars
-                //     data => {
-                //         //You can get warning (error: 'data' is defined but never used;), if you don't use parameters;
-                //         console.log(data);
-                //         this.$router.push('/profile');
-                //
-                //     },
-                //     error => {
-                //         console.log(error);
-                //         this.$store.dispatch('error', 'Username or password is not valid.');
-                //         this.loading = false;
-                //     }
-                // );
+
 
             },
 
