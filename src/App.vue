@@ -57,13 +57,24 @@
     export default {
         data() {
             return {
-                currentUser: null
+                currentUser: null,
+                currentUserBasicData: [],
+                currentUserVisualizationData: []
             };
         },
         created() {
             UserService.currentUser.subscribe(data => {
                 this.currentUser = data;
             });
+            UserService.currentUserBasicData.subscribe(data => {
+                this.currentUserBasicData = data;
+            });
+
+            UserService.currentUserVisualizationData.subscribe(data => {
+                this.currentUserVisualizationData = data;
+            });
+
+
         },
         computed: {
             isAdmin() {

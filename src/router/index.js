@@ -8,6 +8,7 @@ import NotFound from '../views/Error_NotFound.vue'
 import Unauthorized from '../views/Error_Unauthorized.vue'
 import Role from '../models/role'
 import UserService from '../services/user.service'
+import UserAllData from "../views/UserAllData";
 
 Vue.use(Router)
 
@@ -33,6 +34,16 @@ const router = new Router({
         {
             path: '/profile',
             component: Profile,
+            meta: { roles: [Role.ADMIN, Role.USER] }
+        },
+        {
+            path: '/userdata',
+            component: UserAllData,
+            meta: { roles: [Role.ADMIN, Role.USER] }
+        },
+        {
+            path: '/basicdata/{username}',
+            component: UserAllData,
             meta: { roles: [Role.ADMIN, Role.USER] }
         },
         //Only admin can see it.

@@ -48,7 +48,8 @@
         },
         mounted() {
             if(UserService.currentUserValue) {
-                this.$router.push('/profile');
+                //this.$router.push('/profile');
+                this.$router.push('/userdata');
             }
         },
         methods: {
@@ -59,11 +60,25 @@
                     this.loading = false;
                     return;
                 }
+
                 UserService.login(this.user).then(
+                    // eslint-disable-next-line no-unused-vars
                     data => {
                         //You can get warning (error: 'data' is defined but never used;), if you don't use parameters;
-                        console.log(data);
-                        this.$router.push('/profile');
+                        //console.log(data);
+                        UserService.userBasicData(this.user).then(
+                            // eslint-disable-next-line no-unused-vars
+                            data => {
+                                //console.log(data);
+                                //change to /userdata view
+                                this.$router.push('/userdata');
+                            },
+                            error => {
+                                console.log(error);
+                                this.$store.dispatch('error', 'Username or password is not valid.');
+                                this.loading = false;
+                            }
+                        );
                     },
                     error => {
                         console.log(error);
@@ -71,6 +86,8 @@
                         this.loading = false;
                     }
                 );
+
+
             }
         }
     }
