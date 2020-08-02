@@ -374,16 +374,17 @@
                 // };
 
                // let us = new User(this.currentUser.username,this.currentUser.password,this.currentUser.name,this.currentUser.role,this.currentUser.token,this.currentUser.id)
-                UserService.userVisualizationData(this.currentUser,'validation').then(
-                    data => {
-                        console.log(data);
-                    },
-                    error => {
-                        console.log(error);
-                        this.$store.dispatch('error', 'Username or password is not valid.');
-                        this.loading = false;
-                    }
-                );
+                UserService.userVisualizationData(this.currentUser,'validation');
+                //     .then(
+                //     data => {
+                //         console.log(data);
+                //     },
+                //     error => {
+                //         console.log(error);
+                //         this.$store.dispatch('error', 'Username or password is not valid.');
+                //         this.loading = false;
+                //     }
+                // );
                 //     .then(
                 //     // eslint-disable-next-line no-unused-vars
                 //     data => {
