@@ -104,9 +104,10 @@ class UserService {
             type: validationType
         };
         const headers = {
-            authorization: 'Basic ' + btoa(user.username + ':' + user.password)
+            authorization: 'Basic ' + btoa(user.username + ':' + 'xilon1983')
         };
 
+        let res ='';
         async function makeRequest(){
             const config ={
                 method: method,
@@ -116,17 +117,16 @@ class UserService {
             }
             console.log(config)
 
-            let res = await axios(config).then( response => {
+            res = await axios(config).then( response => {
                     console.log("userVisData -- response: " + JSON.stringify(response.data));
                     localStorage.setItem('currentUser_visualizationData', JSON.stringify(response.data));
                     currentUserVisualizationData.next(response.data);
                     //console.log(currentUserBasicData));
                 }
             );
-            console.log(res.data);
         }
 
-        makeRequest().then(r => console.log (r));
+        makeRequest().then(res);
 
         // return axios.get(API_URL+'visualization?username='+ user.username + '?type=' + validationType, {headers: headers}).then(
         // return axios.get(API_URL+'visualization', {
