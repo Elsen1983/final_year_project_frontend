@@ -64,7 +64,7 @@
                     // eslint-disable-next-line no-unused-vars
                     data => {
                         //You can get warning (error: 'data' is defined but never used;), if you don't use parameters;
-                        //console.log(data);
+                        console.log(data);
                         UserService.userBasicData(this.user).then(
                             // eslint-disable-next-line no-unused-vars
                             data => {

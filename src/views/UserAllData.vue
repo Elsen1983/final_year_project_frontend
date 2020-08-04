@@ -65,8 +65,10 @@
                                         <b-col cols="4">
                                             <template>
                                                 <div>
-                                                    <b-form-select id="actionSelector" @change="onchangeAction()" v-model="actionType" :options="actionTypeList" class="form-control form-control-sm"></b-form-select>
-                                                    <option :value="undefined" disabled style="display:none">Select type of action</option>
+
+                                                    <b-form-select id="actionSelector" @change="onchangeAction()" v-model="actionType" :options="actionTypeList" class="form-control form-control-sm">
+                                                        <option :value="undefined" disabled style="display:none">Select type of action</option>
+                                                    </b-form-select>
                                                     <div class="mt-3">Selected: <strong>{{ actionType }}</strong></div>
                                                 </div>
                                             </template>
@@ -82,23 +84,30 @@
                             </form>
                         </template>
                     </b-sidebar>
-                    <div>
-                        <b-tabs
-                                active-nav-item-class="font-weight-bold text-uppercase text-danger"
-                                active-tab-class="font-weight-bold text-success"
-                                content-class="mt-3"
-                        >
-                            <b-tab title="Bar Chart" active>
-                                <p>I'm the first tab</p>
-                            </b-tab>
-                            <b-tab title="Line Chart">
-                                <p>I'm the second tab</p>
-                            </b-tab>
-                            <b-tab title="Pie Chart" >
-                                <p>I'm the third tab!</p>
-                            </b-tab>
-                        </b-tabs>
-                    </div>
+                    <template>
+                        <div>
+                            <b-tabs
+                                    active-nav-item-class="font-weight-bold text-uppercase text-danger"
+                                    active-tab-class="font-weight-bold text-success"
+                                    content-class="mt-3"
+                            >
+                                <b-tab title="Bar Chart" active>
+                                    <p ></p>
+                                    <section id="barChartVis">
+<!--                                        <svg width="500" height="500"></svg>-->
+                                    </section>
+                                    <p>I'm the first tab</p>
+                                </b-tab>
+                                <b-tab title="Line Chart">
+                                    <p>I'm the second tab</p>
+                                </b-tab>
+                                <b-tab title="Pie Chart" >
+                                    <p>I'm the third tab!</p>
+                                </b-tab>
+                            </b-tabs>
+                        </div>
+                    </template>
+
                 </template>
 
             </b-modal>
@@ -109,6 +118,8 @@
 <script>
     import UserService from '../services/user.service';
     import User from "../models/user";
+    // eslint-disable-next-line no-unused-vars
+    import * as d3 from 'd3';
     export default {
         name: 'userdata',
         data() {
@@ -137,6 +148,7 @@
                 //submit
                 submit: '',
                 currentUserVisualizationData:[]
+
             };
         },
         computed: {
@@ -149,7 +161,7 @@
             this.currentUserBasicData = UserService.currentUserBasicDataValue;
             //console.log(this.currentUserBasicData);
 
-            this.currentUserVisualizationData = UserService.currentUserVisualizationDataValue;
+
 
             //logOut the user when refreshing a page
             if(this.currentUserBasicData !== null) {
@@ -232,6 +244,7 @@
                 if(this.dateFrom !== "All Date" && this.dateFrom !== this.timeSelectFrom[this.timeSelectFrom.length -1]){
                     document.getElementById('dateToSelector').removeAttribute("disabled");
                     document.getElementById('actionSelector').setAttribute("disabled", "disabled");
+                    document.getElementById('submitSearchBTN').setAttribute("disabled", "disabled");
 
                     let index = this.dateFrom;
                     let fromDateSelected = this.timeSelectFrom.indexOf(index);
@@ -245,6 +258,7 @@
                 else{
 
                     document.getElementById('dateToSelector').setAttribute("disabled", "disabled");
+                    document.getElementById('submitSearchBTN').setAttribute("disabled", "disabled");
 
                     //if last date selected
                     if(this.dateFrom === this.timeSelectFrom[this.timeSelectFrom.length -1]){
@@ -343,16 +357,185 @@
                 console.log(action)
                 document.getElementById('submitSearchBTN').removeAttribute('disabled');
             },
-            submitSearch(){
+            async submitSearch(){
+                this.currentUserVisualizationData.length=0;
 
-                // console.log(this.currentUser.name)
-                // console.log(this.currentUser.password)
-                // console.log(this.currentUser.token)
+                // console.log("Current User: " + this.currentUser.username)
+                // console.log("Selected action: " + this.actionType)
 
-               // let us = new User(this.currentUser.username,this.currentUser.password,this.currentUser.name,this.currentUser.role,this.currentUser.token,this.currentUser.id)
-                UserService.userVisualizationData(this.currentUser,'validation');
+                await UserService.userVisualizationData(this.currentUser, this.actionType);
 
 
+                //compare the object arrays and find the same elements in both based on timestamp key
+
+                let result = UserService.currentUserVisualizationDataValue.filter(o1 => this.selectedObjectsBeforeActionTypeSelection.some(o2 => o1.timestamp === o2.timestamp));
+                //To get unique elements instead of the common ones, change the last line to let result = arr1.filter(o1 => !arr2.some(o2 => o1.id === o2.id)); to return the opposite value
+
+                console.log(result)
+
+                this.setupGraphsBarChart(result);
+
+            },
+
+            setupGraphsBarChart(list){
+
+                console.log(list)
+
+                // const w = 400;
+                // const h = 500;
+                //
+                // // eslint-disable-next-line no-unused-vars
+                // const svg = d3.select("#barChartVis").append("svg").attr("width", w).attr("height", h);
+
+
+                let data = list;
+                let margin = {top: 30, right: 50, bottom: 30, left: 50};
+
+                let height = 350 - margin.top - margin.bottom;
+                let width = 400 - margin.left - margin.right;
+
+                // eslint-disable-next-line no-unused-vars
+                let dynamicColor;
+
+                // eslint-disable-next-line no-unused-vars
+                let yScale = d3.scaleLinear().domain([0, d3.max(data)]).range([0, height]);
+                // eslint-disable-next-line no-unused-vars
+                let xScale = d3.scaleBand().domain(d3.range(0, data.length)).range([0, width]);
+                //
+                // eslint-disable-next-line no-unused-vars
+                let colors = d3.scaleLinear().domain([0, data.length * .2, data.length * .4, data.length * .6, data.length * .8, data.length])
+                    .range(['#7da6ff', '#6293fc', '#437efa', '#286dfc', '#0a5aff', '#0442c2']);
+
+                // eslint-disable-next-line no-unused-vars
+                let svg = d3.select('#barChartVis').append('svg')
+                    .attr('id', 'barChart_svg')
+                    .attr('width', width + margin.left + margin.right)
+                    .attr('height', height + margin.top + margin.bottom)
+                    .style('background', '#bce8f1')
+
+                svg.append("text")
+                    .attr("transform", "translate(100,0)")
+                    .attr("x", -70)
+                    .attr("y", 15)
+                    .attr("font-size", "12px")
+                    .attr("text-decoration", "underline")
+                    .text('The selected action type is: ' + this.actionType)
+
+                // eslint-disable-next-line no-unused-vars
+                let group = svg.append('g')
+                    .attr('class', 'bar_g')
+                    .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')')
+                    .selectAll('rect')
+                    .data(data)
+                    .enter();
+
+                // eslint-disable-next-line no-unused-vars
+                let bar = group.append('rect').attr("class", "bar")
+                    .styles({
+                        'fill': function (d, i) {
+                            return colors(i);
+                        },
+                        'stroke': '#1a1d6e',
+                        'stroke-width': '2'
+                    })
+                    .attr('width', xScale.bandwidth())
+                    .attr('x', function (d, i) {
+                        return xScale(i);
+                    })
+                    .attr('height', 0)
+                    .attr('y', height);
+
+                //Add the SVG Text Element to the svgContainer
+                // eslint-disable-next-line no-unused-vars
+                let text = bar.select("text")
+                    .data(data)
+                    .enter()
+                    .append("text");
+                //
+                // //Add SVG Text Element Attributes
+                // // eslint-disable-next-line no-unused-vars
+                // let textLabels = text
+                //     .attr('x', function (d, i) {
+                //         return xScale(i) + 10;
+                //     })
+                //     .attr('y', height - 15)
+                //     .text(function (d, i) {
+                //         return data[i];
+                //     })
+                //     .attr("font-family", "sans-serif")
+                //     .attr("font-size", "13px")
+                //     .attr("fill", "#bce8f1");
+                //
+                // bar.transition()
+                //     .attr('height', function (d) {
+                //         return yScale(d);
+                //     })
+                //     .attr('y', function (d) {
+                //         return height - yScale(d);
+                //     })
+                //     .delay(function (d, i) {
+                //         return i * 350;
+                //     })
+                //     .duration(3000)
+                //     .ease(d3.easeElastic);
+                //
+                // bar.on("mouseover", onMouseOver)
+                // bar.on("mouseout", onMouseOut)
+                //
+                // // eslint-disable-next-line no-unused-vars
+                // function onMouseOver(d, i) {
+                //     dynamicColor = this.style.fill;
+                //     d3.select(this)
+                //         .style('fill', '#3c763d');
+                // }
+                //
+                // // eslint-disable-next-line no-unused-vars
+                // function onMouseOut(d, i) {
+                //     d3.select(this)
+                //         .style('fill', dynamicColor);
+                // }
+                //
+                //
+                // let verticalGuideScale = d3.scaleLinear()
+                //     .domain([0, d3.max(data)])
+                //     .range([height, 0]);
+                //
+                // let vAxis = d3.axisLeft(verticalGuideScale)
+                //     .ticks(15);
+                //
+                // let verticalGuide = d3.select('#barChart_svg').append('g').attr('class', 'vert_g');
+                //
+                // vAxis(verticalGuide);
+                //
+                // verticalGuide.attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+                // verticalGuide.selectAll('path')
+                //     .styles({
+                //         fill: 'none',
+                //         stroke: "#3c763d"
+                //     });
+                // verticalGuide.selectAll('line')
+                //     .styles({
+                //         stroke: "#3c763d"
+                //     });
+                //
+                //
+                // let hAxis = d3.axisBottom(xScale).tickFormat(x => `201${x.toFixed(data.size)}`);
+                // let horizontalGuide = d3.select('#barChart_svg').append('g');
+                // hAxis(horizontalGuide);
+                // horizontalGuide.attr('transform', 'translate(' + margin.left + ', ' + (height + margin.top) + ')');
+                //
+                // horizontalGuide.selectAll('path')
+                //     .styles({
+                //         fill: 'none',
+                //         stroke: "#3c763d"
+                //     });
+                //
+                // horizontalGuide.selectAll('line')
+                //     .styles({
+                //         stroke: "#3c763d"
+                //     });
+
+//                document.getElementById('barChartData').innerHTML = "";
             },
 
             baseDashboardChanges(){
