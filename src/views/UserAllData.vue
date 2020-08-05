@@ -99,6 +99,9 @@
                                     <p>I'm the first tab</p>
                                 </b-tab>
                                 <b-tab title="Line Chart">
+                                    <section id="lineChartVis">
+                                        <!--                                        <svg width="500" height="500"></svg>-->
+                                    </section>
                                     <p>I'm the second tab</p>
                                 </b-tab>
                                 <b-tab title="Pie Chart" >
@@ -147,7 +150,8 @@
                 selectedObjectsAfterSearch: [],
                 //submit
                 submit: '',
-                currentUserVisualizationData:[]
+                currentUserVisualizationData:[],
+                keyAndValueSelectedDatesObjectsArray:[]
 
             };
         },
@@ -367,213 +371,234 @@
 
 
                 //compare the object arrays and find the same elements in both based on timestamp key
-
                 let result = UserService.currentUserVisualizationDataValue.filter(o1 => this.selectedObjectsBeforeActionTypeSelection.some(o2 => o1.timestamp === o2.timestamp));
                 //To get unique elements instead of the common ones, change the last line to let result = arr1.filter(o1 => !arr2.some(o2 => o1.id === o2.id)); to return the opposite value
 
-                console.log(result)
 
-                this.setupGraphsBarChart(result);
+                this.calculateVisualizationData(result);
 
             },
 
-            setupGraphsBarChart(list){
+            calculateVisualizationData(resultObjectsArray){
 
-                console.log(list)
+                this.keyAndValueSelectedDatesObjectsArray.length = 0;
+                console.log(resultObjectsArray)
 
-                // const w = 400;
-                // const h = 500;
-                //
-                // // eslint-disable-next-line no-unused-vars
-                // const svg = d3.select("#barChartVis").append("svg").attr("width", w).attr("height", h);
+                //get all dates without 'All Dates'
+                let allDates = [...this.timeSelected];
+                console.log("selected dates: " + allDates);
 
 
-                let data = list;
-                let margin = {top: 30, right: 50, bottom: 30, left: 50};
-
-                let height = 350 - margin.top - margin.bottom;
-                let width = 400 - margin.left - margin.right;
-
+                //create an objects array with all the dates(timestamp) and count(value) them with 0
+                for (let i=0; i< allDates.length; i++){
+                    let obj = {};
+                    let timestamp = allDates[i];
+                    let count = 0;
+                    obj.timestamp = timestamp;
+                    obj.count = count;
+                    this.keyAndValueSelectedDatesObjectsArray.push(obj);
+                }
                 // eslint-disable-next-line no-unused-vars
-                let dynamicColor;
+                // let keyAndValueSelectedDatesObjectsArray = allDates.map((str, index) => ({ timestamp: str, value: 0 }));
+                console.log(this.keyAndValueSelectedDatesObjectsArray);
 
-                // eslint-disable-next-line no-unused-vars
-                let yScale = d3.scaleLinear().domain([0, d3.max(data)]).range([0, height]);
-                // eslint-disable-next-line no-unused-vars
-                let xScale = d3.scaleBand().domain(d3.range(0, data.length)).range([0, width]);
-                //
-                // eslint-disable-next-line no-unused-vars
-                let colors = d3.scaleLinear().domain([0, data.length * .2, data.length * .4, data.length * .6, data.length * .8, data.length])
-                    .range(['#7da6ff', '#6293fc', '#437efa', '#286dfc', '#0a5aff', '#0442c2']);
+                for(let i = 0; i<this.keyAndValueSelectedDatesObjectsArray.length; i++){
 
-                // eslint-disable-next-line no-unused-vars
-                let svg = d3.select('#barChartVis').append('svg')
-                    .attr('id', 'barChart_svg')
-                    .attr('width', width + margin.left + margin.right)
-                    .attr('height', height + margin.top + margin.bottom)
-                    .style('background', '#bce8f1')
+                    delete this.keyAndValueSelectedDatesObjectsArray[i]['date'];
+                    delete this.keyAndValueSelectedDatesObjectsArray[i]['value'];
+                    console.log(this.keyAndValueSelectedDatesObjectsArray[i].timestamp);
 
-                svg.append("text")
-                    .attr("transform", "translate(100,0)")
-                    .attr("x", -70)
-                    .attr("y", 15)
-                    .attr("font-size", "12px")
-                    .attr("text-decoration", "underline")
-                    .text('The selected action type is: ' + this.actionType)
+                    for(let j = 0; j<resultObjectsArray.length; j++) {
+                        let date = "";
+                        date = resultObjectsArray[j].timestamp.split(" ");
 
-                // eslint-disable-next-line no-unused-vars
-                let group = svg.append('g')
-                    .attr('class', 'bar_g')
-                    .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')')
-                    .selectAll('rect')
-                    .data(data)
-                    .enter();
+                        console.log(date[0])
 
-                // eslint-disable-next-line no-unused-vars
-                let bar = group.append('rect').attr("class", "bar")
-                    .styles({
-                        'fill': function (d, i) {
-                            return colors(i);
-                        },
-                        'stroke': '#1a1d6e',
-                        'stroke-width': '2'
-                    })
-                    .attr('width', xScale.bandwidth())
-                    .attr('x', function (d, i) {
-                        return xScale(i);
-                    })
-                    .attr('height', 0)
-                    .attr('y', height);
+                        if(this.keyAndValueSelectedDatesObjectsArray[i].timestamp === date[0]){
+                            //console.log("same")
+                            this.keyAndValueSelectedDatesObjectsArray[i].count++;
+                        }
+                    }
+                }
 
-                //Add the SVG Text Element to the svgContainer
+
+                console.log(this.keyAndValueSelectedDatesObjectsArray)
+
+                let data = [...this.keyAndValueSelectedDatesObjectsArray];
+
+                this.setupGraphsBarChart(data)
+
+                this.setupGraphsLineChart(data)
+            },
+
+            //need to be fixed, but works mostly
+            // eslint-disable-next-line no-unused-vars
+            setupGraphsLineChart(data){
+
+                for(let i =0; i<data.length; i++){
+                    let date = '';
+                    date = data[i].timestamp;
+                    data[i].timestamp = new Date(date);
+                }
+
+                let maxcount = 0;
+                for(let i=0; i<data.length; i++){
+                    if(data[i].count > maxcount){
+                        maxcount = data[i].count;
+                    }
+                }
+
+                // data.sort(function(a,b){
+                //     return new Date(b.date) - new Date(a.date);
+                // });
+
+                let height  = 500;
+                let width   = window.innerWidth / 2;
                 // eslint-disable-next-line no-unused-vars
-                let text = bar.select("text")
+                let hEach   = 40;
+
+                let margin = {top: 25, right: 50, bottom: 75, left: 25};
+
+                width =     width - margin.left - margin.right;
+                height =    height - margin.top - margin.bottom;
+
+                let svg = d3.select('#lineChartVis').append("svg")
+                    .attr("id", "lineChart")
+                    .attr("width",  width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                // set the ranges
+                let x = d3.scaleTime().range([0, width]);
+
+                // x.domain(d3.extent(data, function(d) { return d.timestamp; }));
+                x.domain(d3.extent(data, function(d) { return d.timestamp; }));
+
+                let y = d3.scaleLinear().range([height, 0]);
+
+                y.domain([0, maxcount]);
+
+
+                var valueline = d3.line()
+                    .x(function(d) { return x(d.timestamp); })
+                    .y(function(d) { return y(d.count);  })
+                    .curve(d3.curveMonotoneX);
+
+                svg.append("path")
+                    .data([data])
+                    .attr("class", "line")
+                    .attr("d", valueline);
+
+                //  var xAxis_woy = d3.axisBottom(x).tickFormat(d3.timeFormat("Week %V"));
+                var xAxis_woy = d3.axisBottom(x).ticks(20).tickFormat(d3.timeFormat("%Y-%m-%d")).tickValues(data.map(d=>d.timestamp));
+
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis_woy)
+                    .selectAll("text")
+                    .attr("y", 0)
+                    .attr("x", 9)
+                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(45)")
+                    .style("text-anchor", "start");
+
+                //  Add the Y Axis
+                 svg.append("g").call(d3.axisLeft(y));
+
+                svg.selectAll(".dot")
                     .data(data)
                     .enter()
-                    .append("text");
-                //
-                // //Add SVG Text Element Attributes
-                // // eslint-disable-next-line no-unused-vars
-                // let textLabels = text
-                //     .attr('x', function (d, i) {
-                //         return xScale(i) + 10;
-                //     })
-                //     .attr('y', height - 15)
-                //     .text(function (d, i) {
-                //         return data[i];
-                //     })
-                //     .attr("font-family", "sans-serif")
-                //     .attr("font-size", "13px")
-                //     .attr("fill", "#bce8f1");
-                //
-                // bar.transition()
-                //     .attr('height', function (d) {
-                //         return yScale(d);
-                //     })
-                //     .attr('y', function (d) {
-                //         return height - yScale(d);
-                //     })
-                //     .delay(function (d, i) {
-                //         return i * 350;
-                //     })
-                //     .duration(3000)
-                //     .ease(d3.easeElastic);
-                //
-                // bar.on("mouseover", onMouseOver)
-                // bar.on("mouseout", onMouseOut)
-                //
-                // // eslint-disable-next-line no-unused-vars
-                // function onMouseOver(d, i) {
-                //     dynamicColor = this.style.fill;
-                //     d3.select(this)
-                //         .style('fill', '#3c763d');
-                // }
-                //
-                // // eslint-disable-next-line no-unused-vars
-                // function onMouseOut(d, i) {
-                //     d3.select(this)
-                //         .style('fill', dynamicColor);
-                // }
-                //
-                //
-                // let verticalGuideScale = d3.scaleLinear()
-                //     .domain([0, d3.max(data)])
-                //     .range([height, 0]);
-                //
-                // let vAxis = d3.axisLeft(verticalGuideScale)
-                //     .ticks(15);
-                //
-                // let verticalGuide = d3.select('#barChart_svg').append('g').attr('class', 'vert_g');
-                //
-                // vAxis(verticalGuide);
-                //
-                // verticalGuide.attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
-                // verticalGuide.selectAll('path')
-                //     .styles({
-                //         fill: 'none',
-                //         stroke: "#3c763d"
-                //     });
-                // verticalGuide.selectAll('line')
-                //     .styles({
-                //         stroke: "#3c763d"
-                //     });
-                //
-                //
-                // let hAxis = d3.axisBottom(xScale).tickFormat(x => `201${x.toFixed(data.size)}`);
-                // let horizontalGuide = d3.select('#barChart_svg').append('g');
-                // hAxis(horizontalGuide);
-                // horizontalGuide.attr('transform', 'translate(' + margin.left + ', ' + (height + margin.top) + ')');
-                //
-                // horizontalGuide.selectAll('path')
-                //     .styles({
-                //         fill: 'none',
-                //         stroke: "#3c763d"
-                //     });
-                //
-                // horizontalGuide.selectAll('line')
-                //     .styles({
-                //         stroke: "#3c763d"
-                //     });
+                    .append("circle") // Uses the enter().append() method
+                    .attr("class", "dot") // Assign a class for styling
+                    .attr("cx", function(d) { return x(d.timestamp) })
+                    .attr("cy", function(d) { return y(d.count) })
+                    .attr("r", 5);
 
-//                document.getElementById('barChartData').innerHTML = "";
+
+                svg.selectAll(".text")
+                    .data(data)
+                    .enter()
+                    .append("text") // Uses the enter().append() method
+                    .attr("class", "label") // Assign a class for styling
+                    // eslint-disable-next-line no-unused-vars
+                    .attr("x", function(d, i) { return x(d.timestamp) })
+                    .attr("y", function(d) { return y(d.count) })
+                    .attr("dy", "-5")
+                    .text(function(d) {return d.count; });
+
+                svg.append('text')
+                    .attr('x', 10)
+                    .attr('y', -5)
+                    .text(this.actionType);
+                
+
             },
+
+            setupGraphsBarChart(data){
+
+                console.log(data);
+
+                let maxcount = 0;
+                for(let i=0; i<data.length; i++){
+                    if(data[i].count > maxcount){
+                        maxcount = data[i].count;
+                    }
+                }
+
+                // set the dimensions and margins of the graph
+                let margin = {top: 20, right: 20, bottom: 30, left: 40},
+                    width = 700 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+                // set the ranges
+                let x = d3.scaleBand()
+                    .range([0, width])
+                    .padding(0.1);
+
+                let y = d3.scaleLinear()
+                    .range([height, 0]);
+
+                // append the svg object to the body of the page
+                // append a 'group' element to 'svg'
+                // moves the 'group' element to the top left margin
+                let svg = d3.select("#barChartVis").append("svg")
+                    .attr("id", "barChart")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+
+                // Scale the range of the data in the domains
+                x.domain(data.map(function(d) { return d.timestamp; }));
+                y.domain([0, d3.max(data, function(d) { return d.count; })]);
+                // append the rectangles for the bar chart
+                svg.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d) { return x(d.timestamp); })
+                    .attr("width", x.bandwidth())
+                    .attr("y", function(d) { return y(d.count); })
+                    .attr("height", function(d) { return height - y(d.count); });
+                // add the x Axis
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x));
+                // add the y Axis
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+
+
+    },
 
             baseDashboardChanges(){
                 this.themeSelector = '0';
             }
-
-
-            //call setupAllDate
-            // setupDateForAll(){
-            //     this.setupAllDate();
-            // },
-            //check that 'All Date' button is switched on or not
-            //allDateSelectorStatus(){
-                //     if(this.allDateButtonStatus === false){
-                //         this.clearTimeSelectorsArray();
-                //     }
-                //     else{
-                //         this.getTimestampsFrom();
-                //     }
-                // },
-                //clear the 'timeSelectFrom' and 'timeSelectTo' arrays because 'All Date' button was switch on
-                // clearTimeSelectorsArray(){
-                //     this.timeSelectFrom = undefined;
-                //     this.timeSelectTo = undefined;
-                //     document.getElementById('dateToSelector').setAttribute("disabled", "disabled");
-                //     console.log("Setup all dates for ALL button after switch on ...");
-                //     //setup data for 'All Date' button again
-                //     this.setupDateForAll()
-                //
-                // },
-                //setup the 'timeSelectFrom' and 'timeSelectTo' arrays because 'All Date' button was switch off
-                // getTimestampsFrom() {
-                //     console.log("Setup all dates for date From button");
-                //     this.setupAllDate();
-                // },
-                //setup
-
-
 
         }
     }
@@ -607,4 +632,23 @@
     .b-sidebar {
         height: 75vh !important;
     }
+
+    /*
+    line chart style
+    */
+    .line {
+        fill: none;
+        stroke: #ffab00;
+        stroke-width: 3;
+    }
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+    .axis text {
+        font-size: 10px;
+    }
+
 </style>
