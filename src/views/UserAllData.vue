@@ -105,6 +105,9 @@
                                     <p>I'm the second tab</p>
                                 </b-tab>
                                 <b-tab title="Pie Chart" >
+                                    <section id="pieChartVis">
+                                        <!--                                        <svg width="500" height="500"></svg>-->
+                                    </section>
                                     <p>I'm the third tab!</p>
                                 </b-tab>
                             </b-tabs>
@@ -429,6 +432,8 @@
                 this.setupGraphsBarChart(data)
 
                 this.setupGraphsLineChart(data)
+
+                this.setupGraphsPieChart(data)
             },
 
             //need to be fixed, but works mostly
@@ -453,11 +458,12 @@
                 // });
 
                 let height  = 500;
-                let width   = window.innerWidth / 2;
+                //70%
+                let width   = window.innerWidth/2;
                 // eslint-disable-next-line no-unused-vars
                 let hEach   = 40;
 
-                let margin = {top: 25, right: 50, bottom: 75, left: 25};
+                let margin = {top: 35, right: 50, bottom: 75, left: 25};
 
                 width =     width - margin.left - margin.right;
                 height =    height - margin.top - margin.bottom;
@@ -483,7 +489,7 @@
                 var valueline = d3.line()
                     .x(function(d) { return x(d.timestamp); })
                     .y(function(d) { return y(d.count);  })
-                    .curve(d3.curveMonotoneX);
+                    .curve(d3.curveLinear);
 
                 svg.append("path")
                     .data([data])
@@ -501,7 +507,7 @@
                     .attr("y", 0)
                     .attr("x", 9)
                     .attr("dy", ".35em")
-                    .attr("transform", "rotate(45)")
+                    .attr("transform", "rotate(65)")
                     .style("text-anchor", "start");
 
                 //  Add the Y Axis
@@ -530,9 +536,9 @@
 
                 svg.append('text')
                     .attr('x', 10)
-                    .attr('y', -5)
+                    .attr('y', -15)
                     .text(this.actionType);
-                
+
 
             },
 
@@ -549,15 +555,18 @@
 
                 // set the dimensions and margins of the graph
                 let margin = {top: 20, right: 20, bottom: 30, left: 40},
-                    width = 700 - margin.left - margin.right,
+                    width = window.innerWidth/2 - margin.left - margin.right,
                     height = 500 - margin.top - margin.bottom;
 
-                // set the ranges
-                let x = d3.scaleBand()
+                // Scale the range of the data in the domains
+                // Set the ranges
+                let xScale = d3.scaleBand()
+                    .domain(data.map(function(d) { return d.timestamp; }))
                     .range([0, width])
-                    .padding(0.1);
+                    .padding(0.2);
 
-                let y = d3.scaleLinear()
+                let yScale = d3.scaleLinear()
+                    .domain([0, d3.max(data, function(d) { return d.count; })])
                     .range([height, 0]);
 
                 // append the svg object to the body of the page
@@ -567,34 +576,202 @@
                     .attr("id", "barChart")
                     .attr("width", width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
+                    // .style('background', '#bce8f1')
                     .append("g")
+                    .attr('class', 'bar_g')
                     .attr("transform",
                         "translate(" + margin.left + "," + margin.top + ")");
 
-
-                // Scale the range of the data in the domains
-                x.domain(data.map(function(d) { return d.timestamp; }));
-                y.domain([0, d3.max(data, function(d) { return d.count; })]);
                 // append the rectangles for the bar chart
                 svg.selectAll(".bar")
                     .data(data)
                     .enter().append("rect")
                     .attr("class", "bar")
-                    .attr("x", function(d) { return x(d.timestamp); })
-                    .attr("width", x.bandwidth())
-                    .attr("y", function(d) { return y(d.count); })
-                    .attr("height", function(d) { return height - y(d.count); });
+                    .attr("x", function(d) { return xScale(d.timestamp); })
+                    .attr("width", xScale.bandwidth())
+                    .attr("y", function(d) { return yScale(d.count); })
+                    .attr("height", function(d) { return height - yScale(d.count); });
+
                 // add the x Axis
                 svg.append("g")
                     .attr("transform", "translate(0," + height + ")")
-                    .call(d3.axisBottom(x));
+                    .call(d3.axisBottom(xScale));
                 // add the y Axis
                 svg.append("g")
-                    .call(d3.axisLeft(y));
-
-
+                    .call(d3.axisLeft(yScale));
 
     },
+
+            setupGraphsPieChart(data){
+
+                let dataset = [...data]
+                // chart dimensions
+                let width = 800;
+                let height = 500;
+
+                // a circle chart needs a radius
+                let radius = Math.min(width, height) / 2;
+
+                // legend dimensions
+                // defines the size of the colored squares in legend
+                let legendRectSize = 20;
+                // defines spacing between squares
+                let legendSpacing = 5;
+
+                // define color scale
+                let color = d3.scaleOrdinal([`#383867`, `#584c77`, `#33431e`, `#a36629`, `#92462f`, `#b63e36`, `#b74a70`, `#946943`])
+                // more color scales: https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9
+
+                // select element in the DOM with id 'pieChartVis'
+                let svg = d3.select('#pieChartVis')
+                    // append an svg element to the element we've selected
+                    .append('svg')
+                    // set the width of the svg element we just added
+                    .attr('width', width)
+                    // set the height of the svg element we just added
+                    .attr('height', height)
+                    // append 'g' element to the svg element
+                    .append('g')
+                    // our reference is now to the 'g' element. centering the 'g' element to the svg element
+                    .attr('transform', 'translate(' + (width / 3) + ',' + (height / 2) + ')');
+
+                let arc = d3.arc()
+                    // 0 for pie chart
+                    .innerRadius(radius/5)
+                    // size of overall chart
+                    .outerRadius(radius);
+
+
+                // start and end angles of the segments
+                let pie = d3.pie()
+                    // how to extract the numerical data from each entry in our dataset
+                    .value(function(d) { return d.count; })
+                    // by default, data sorts in value. this will mess with our animation so we set it to null
+                    .sort(null);
+
+                dataset.forEach(function(d) {
+                    // calculate count as we iterate through the data
+                    d.count = +d.count;
+                    // add enabled property to track which entries are checked
+                    d.enabled = true;
+                });
+
+                // creating the chart
+                let path = svg
+                    // select all path elements inside the svg. specifically the 'g' element.
+                    // they don't exist yet but they will be created below
+                    .selectAll('path')
+                    // associate dataset wit he path elements we're about to create.
+                    // must pass through the pie function. it magically knows how to extract values and bakes it into the pie
+                    .data(pie(dataset))
+                    //creates placeholder nodes for each of the values
+                    .enter()
+                    // replace placeholders with path elements
+                    .append('path')
+                    // define d attribute with arc function above
+                    .attr('d', arc)
+                    // use color scale to define fill of each label in dataset
+                    .attr('fill', function(d) { return color(d.data.timestamp); })
+                    // creates a smooth animation for each track
+                    .each(function(d) { this._current - d; });
+
+
+
+                // define legend
+                var legend = svg
+                    // selecting elements with class 'legend'
+                    .selectAll('.legend')
+                    // refers to an array of labels from our dataset
+                    .data(color.domain())
+                    // creates placeholder
+                    .enter()
+                    // replace placeholders with g elements
+                    .append('g')
+                    // each g is given a legend class
+                    .attr('class', 'legend')
+                    .attr('transform', function(d, i) {
+                        // height of element is the height of the colored square plus the spacing
+                        let height = legendRectSize + legendSpacing;
+                        // vertical offset of the entire legend = height of a single element & half the total number of elements
+                        let offset =  height * color.domain().length / 2;
+                        // the legend is shifted to the left to make room for the text
+                        let horizontal = 14 * legendRectSize;
+                        // the top of the element is lifted up or down from the center using the offset defined earlier
+                        // and the index of the current element 'i'
+                        let vertical = i * height - offset;
+                        //return translation
+                        return 'translate(' + horizontal + ',' + vertical + ')';
+                    });
+
+                // adding colored squares to legend
+                legend
+                    // append rectangle squares to legend
+                    .append('rect')
+                    // width of rect size is defined above
+                    .attr('width', legendRectSize)
+                    // height of rect size is defined above
+                    .attr('height', legendRectSize)
+                    // each fill is passed a color
+                    .style('fill', color)
+                    // each stroke is passed a color
+                    .style('stroke', color)
+                    .on('click', function(label) {
+                        // this refers to the colored squared just clicked
+                        let rect = d3.select(this);
+                        // set enabled true to default
+                        let enabled = true;
+                        // can't disable all options
+                        let totalEnabled = d3.sum(dataset.map(function(d) {
+                            // return 1 for each enabled entry. and summing it up
+                            return (d.enabled) ? 1 : 0;
+                        }));
+
+                        // if class is disabled
+                        if (rect.attr('class') === 'disabled') {
+                            // remove class disabled
+                            rect.attr('class', '');
+                        } else {
+                            // if less than two labels are flagged, exit
+                            if (totalEnabled < 2) return;
+                            // otherwise flag the square disabled
+                            rect.attr('class', 'disabled');
+                            // set enabled to false
+                            enabled = false;
+                        }
+
+                        pie.value(function(d) {
+                            // if entry label matches legend label
+                            if (d.timestamp === label) d.enabled = enabled;
+                            // update enabled property and return count or 0 based on the entry's status
+                            return (d.enabled) ? d.count : 0;
+                        });
+
+                        // update pie with new data
+                        path = path.data(pie(dataset));
+
+                        // transition of redrawn pie
+                        path.transition()
+                            .duration(550) // 550 millisecond
+                            // 'd' specifies the d attribute that we'll be animating
+                            .attrTween('d', function(d) {
+                                // this = current path element
+                                let interpolate = d3.interpolate(this._current, d);
+                                // interpolate between current value and the new value of 'd'
+                                this._current = interpolate(0);
+                                return function(t) {
+                                    return arc(interpolate(t));
+                                };
+                            });
+                    });
+
+                // adding text to legend
+                legend.append('text')
+                    .attr('x', legendRectSize + legendSpacing)
+                    .attr('y', legendRectSize - legendSpacing)
+                    // return label
+                    .text(function(d) { return d.toLocaleDateString(); });
+
+            },
 
             baseDashboardChanges(){
                 this.themeSelector = '0';
@@ -649,6 +826,59 @@
     }
     .axis text {
         font-size: 10px;
+    }
+
+    /*
+    Pie Chart style
+    */
+    .title-holder {
+        text-align: center;
+    }
+    .title {
+        font-family: 'Lato', sans-serif;
+    }
+    .subtitle {
+        font-size: 20px;
+    }
+    .font {
+        font-size: 18px;
+    }
+
+    /* legend */
+    .legend {
+        font-size: 14px;
+    }
+    rect {
+        cursor: pointer;
+        stroke-width: 2;
+    }
+    rect.disabled {
+        fill: transparent !important;
+    }
+
+    /* chart */
+    #pieChartVis {
+        height: 800px;
+        margin: 0 auto;
+        position: relative;
+        display: block;
+        width: 1200px;
+    }
+
+    /* tooltip */
+    .tooltip {
+        background: #eee;
+        box-shadow: 0 0 5px #999999;
+        color: #333;
+        display: none;
+        font-size: 18px;
+        left: 130px;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        top: 95px;
+        width: 80px;
+        z-index: 10;
     }
 
 </style>
