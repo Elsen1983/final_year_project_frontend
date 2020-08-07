@@ -1,6 +1,6 @@
 <template>
     <div class="col-md-12">
-        <div class="card card-container">
+        <div id="loginContainer" class="card card-container">
             <img id="profile-img" src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" class="profile-img-card"/>
             <form name="form" @submit.prevent="handleLogin">
                 <div class="form-group">
@@ -96,6 +96,14 @@
         display: block;
         margin-top: 10px;
     }
+
+    #loginContainer{
+        border: 3px solid black;
+        -webkit-box-shadow: 9px 10px 15px 0px rgba(77,75,77,0.66);
+        -moz-box-shadow: 9px 10px 15px 0px rgba(77,75,77,0.66);
+        box-shadow: 9px 10px 15px 0px rgba(77,75,77,0.66);
+    }
+
     .card-container.card {
         max-width: 350px !important;
         padding: 40px 40px;

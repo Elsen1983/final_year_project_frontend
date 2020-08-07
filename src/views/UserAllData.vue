@@ -5,36 +5,40 @@
                 <strong>{{currentUser.name}}</strong>,
                 All User Data:
             </h1>
-            <b-button v-b-modal.modal-xl variant="primary" @click="baseDashboardChanges()">Open Dashboard</b-button>
 
-            <b-modal modal-class="modal-fullscreen" id="modal-xl" title="Client Dashboard">
+            <b-button v-b-modal.modal-xl squared variant="success" class="mb-2" size="lg" @click="baseDashboardChanges()">
+                <b-img width="40px" fluid src="../assets/analysis.png" alt="Image 1"></b-img> Open Dashboard
+            </b-button>
+
+            <b-modal modal-class="modal-fullscreen" id="modal-xl" title="Client Dashboard" cancel-disabled ok-disabled hide-footer>
+            <!--        Modal header        -->
                 <template v-slot:modal-header="{ close }">
-                    <h4><strong>Client Dashboard</strong> [{{currentUser.name}}]</h4>
+                    <template class="modal-title">
+                        <h4><strong>Client Dashboard</strong> [{{currentUser.name}}]</h4>
+                    </template>
+
                     <!-- Emulate built in modal header close button action -->
-                    <b-button size="sm"  @click="close()">
+                    <b-button size="sm"  @click="close()" variant="danger">
                         Close Dashboard
                     </b-button>
 
                 </template>
                 <template v-slot:default id="dashboardContainer">
-
-
                     <b-row class="mb-1">
                         <b-col cols="3">Select theme for Dashboard</b-col>
                         <b-col cols="3">
                             <label>
-                                <select v-model="themeSelector" @change="onchangeTheme()" class="form-control form-control-sm">
+                                <b-form-select v-model="themeSelector" @change="onchangeTheme()" class="form-control form-control-sm">
                                     <option :key="index" :value="t" v-for="(t, index) in variants">{{t}}</option>
-                                </select>
+                                </b-form-select>
                             </label>
                         </b-col>
                     </b-row>
                     
                     <hr class="m-0 pt-0">
 
-
                     <!--         SIDEBAR FOR SEARCHING PARAMETERS           -->
-                    <b-button v-b-toggle.sidebar-no-header @click="refreshSearch()">Searching parameters </b-button>
+                    <b-button v-b-toggle.sidebar-no-header variant="warning" @click="refreshSearch()">Searching parameters </b-button>
                     <b-sidebar id="sidebar-no-header" aria-labelledby="sidebar-no-header-title" width="35vw" height="50vh" sidebar-class="border-right border-danger" no-header shadow>
                         <template v-slot:default="{ hide }">
                             <form name="form" @submit.prevent="submitSearch">
@@ -44,20 +48,17 @@
                                     </b-row>
                                     <b-row >
                                         <b-col cols="4">
-                                            <label>
-                                                <select @change="onchangeDateFrom()" class="form-control form-control-sm" v-model="dateFrom">
-                                                    <option :value="undefined" disabled style="display:none">Select date FROM</option>
-                                                    <option :key="index" :value="t" v-for="(t, index) in timeSelectFrom">{{t}}</option>
-                                                </select>
-                                            </label>
+                                            <b-form-select @change="onchangeDateFrom()" class="form-control form-control-sm" v-model="dateFrom">
+                                                <option :value="undefined" disabled style="display:none">Select date FROM</option>
+                                                <option :key="index" :value="t" v-for="(t, index) in timeSelectFrom">{{t}}</option>
+                                            </b-form-select>
                                         </b-col>
                                         <b-col cols="4">
-                                            <label>
-                                                <select id="dateToSelector" disabled @change="onchangeDateTo()" class="form-control form-control-sm" v-model="dateTo">
-                                                    <option :value="undefined" disabled style="display:none">Select date TO</option>
-                                                    <option :key="index" :value="t" v-for="(t, index) in timeSelectTo">{{t}}</option>
-                                                </select>
-                                            </label>
+                                            <b-form-select id="dateToSelector" disabled @change="onchangeDateTo()" class="form-control form-control-sm" v-model="dateTo">
+                                                <option :value="undefined" disabled style="display:none">Select date TO</option>
+                                                <option :key="index" :value="t" v-for="(t, index) in timeSelectTo">{{t}}</option>
+                                            </b-form-select>
+
                                         </b-col>
                                     </b-row>
                                     <div class="mb-3" v-if="timeSelected !== undefined && timeSelected.length !== 0 "><strong>Selected date(s):</strong> {{ timeSelected.join(" - ") }}</div>
@@ -65,7 +66,6 @@
                                         <b-col cols="4">
                                             <template>
                                                 <div>
-
                                                     <b-form-select id="actionSelector" @change="onchangeAction()" v-model="actionType" :options="actionTypeList" class="form-control form-control-sm">
                                                         <option :value="undefined" disabled style="display:none">Select type of action</option>
                                                     </b-form-select>
@@ -75,7 +75,7 @@
                                         </b-col>
                                     </b-row>
 
-                                        <button id="submitSearchBTN" class="btn btn-primary btn-block" disabled><span class="spinner-border spinner-border-sm" v-show="submit"></span>
+                                        <button id="submitSearchBTN" class="btn btn-success btn-block"  disabled><span class="spinner-border spinner-border-sm" v-show="submit"></span>
                                             <span>Submit Search</span>
                                         </button>
 
@@ -85,38 +85,105 @@
                         </template>
                     </b-sidebar>
                     <template>
-                        <div>
-                            <b-tabs
-                                    active-nav-item-class="font-weight-bold text-uppercase text-danger"
-                                    active-tab-class="font-weight-bold text-success"
-                                    content-class="mt-3"
-                            >
-                                <b-tab title="Bar Chart" active>
-                                    <p ></p>
-                                    <section id="barChartVis">
-<!--                                        <svg width="500" height="500"></svg>-->
-                                    </section>
-                                    <p>I'm the first tab</p>
-                                </b-tab>
-                                <b-tab title="Line Chart">
-                                    <section id="lineChartVis">
-                                        <!--                                        <svg width="500" height="500"></svg>-->
-                                    </section>
-                                    <p>I'm the second tab</p>
-                                </b-tab>
-                                <b-tab title="Pie Chart" >
-                                    <section id="pieChartVis">
-                                        <!--                                        <svg width="500" height="500"></svg>-->
-                                    </section>
-                                    <p>I'm the third tab!</p>
-                                </b-tab>
-                            </b-tabs>
+                        <div id="visArea">
+                            <b-card no-body class="mt-1">
+                                <b-tabs card>
+                                    <b-tabs
+                                            active-nav-item-class="font-weight-bold text-uppercase text-danger"
+                                            active-tab-class="font-weight-bold text-success"
+                                            content-class="mt-3"
+                                    >
+                                        <b-tab active>
+                                            <template v-slot:title class="chartTab">
+                                                <b-img width="40px" fluid src="../assets/barchart_icon.png" alt="Image 1"></b-img>
+                                                 Bar Chart
+                                            </template>
+
+                                            <b-card class="overflow-hidden" style="max-width: 1920px; min-width: 1024px;">
+                                                <b-row no-gutters>
+                                                    <b-col md="8">
+                                                        <section id="barChartVis">
+                                                            <b-img width="800px" fluid src="../assets/datavisualization.png" alt="Image 1"></b-img>
+                                                        </section>
+                                                    </b-col>
+                                                    <b-col md="4" class="float-left">
+                                                        <b-card no-body class="cardWithDates mb-1" header="Card with list group">
+                                                                <b-card-header header-tag="header" class="p-1" role="tab" v-for="(item, idx) in reducedObjectArrayForList" :key="idx">
+                                                                    <b-button block v-b-toggle="'accordion-' + idx" variant="info">{{item.timestamp.toLocaleDateString() }}</b-button>
+                                                                    <b-collapse :id="'accordion-' + idx"  :accordion="'my-accordion'" role="tabpanel">
+                                                                        <b-card-body>
+                                                                            <b-card-text>{{ item.count}}</b-card-text>
+                                                                        </b-card-body>
+                                                                    </b-collapse>
+                                                                </b-card-header>
+                                                        </b-card>
+                                                    </b-col>
+                                                </b-row>
+                                            </b-card>
+                                        </b-tab>
+                                        <b-tab >
+                                            <template v-slot:title class="chartTab">
+                                                <b-img width="40px" fluid src="../assets/linechart_icon.png" alt="Image 1"></b-img>
+                                                Line Chart
+                                            </template>
+                                            <b-card class="overflow-hidden" style="max-width: 1920px; min-width: 1024px;">
+                                                <b-row no-gutters>
+                                                    <b-col md="8">
+                                                        <section id="lineChartVis">
+                                                            <b-img width="800px" fluid src="../assets/datavisualization.png" alt="Image 1"></b-img>
+                                                        </section>
+                                                    </b-col>
+                                                    <b-col md="4" class="float-left">
+                                                        <b-card no-body class="cardWithDates mb-1" header="Card with list group">
+                                                            <b-card-header header-tag="header" class="p-1" role="tab" v-for="(item, idx) in reducedObjectArrayForList" :key="idx">
+                                                                <b-button block v-b-toggle="'accordion-' + idx" variant="info">{{item.timestamp.toLocaleDateString() }}</b-button>
+                                                                <b-collapse :id="'accordion-' + idx"  :accordion="'my-accordion'" role="tabpanel">
+                                                                    <b-card-body>
+                                                                        <b-card-text>{{ item.count}}</b-card-text>
+                                                                    </b-card-body>
+                                                                </b-collapse>
+                                                            </b-card-header>
+                                                        </b-card>
+                                                    </b-col>
+                                                </b-row>
+                                            </b-card>
+                                        </b-tab>
+                                        <b-tab>
+                                            <template v-slot:title class="chartTab">
+                                                <b-img width="40px" fluid src="../assets/piechart_icon.png" alt="Image 1"></b-img>
+                                                Pie Chart
+                                            </template>
+                                            <b-card class="overflow-hidden" style="max-width: 1920px; min-width: 1024px;">
+                                                <b-row no-gutters>
+                                                    <b-col md="8">
+                                                        <section id="pieChartVis">
+                                                            <b-img width="800px" fluid src="../assets/datavisualization.png" alt="Image 1"></b-img>
+                                                        </section>
+                                                    </b-col>
+                                                    <b-col md="4" class="float-left">
+                                                        <b-card no-body class="cardWithDates mb-1" header="Card with list group">
+                                                            <b-card-header header-tag="header" class="p-1" role="tab" v-for="(item, idx) in reducedObjectArrayForList" :key="idx">
+                                                                <b-button block v-b-toggle="'accordion-' + idx" variant="info">{{item.timestamp.toLocaleDateString() }}</b-button>
+                                                                <b-collapse :id="'accordion-' + idx"  :accordion="'my-accordion'" role="tabpanel">
+                                                                    <b-card-body>
+                                                                        <b-card-text>{{ item.count}}</b-card-text>
+                                                                    </b-card-body>
+                                                                </b-collapse>
+                                                            </b-card-header>
+                                                        </b-card>
+                                                    </b-col>
+                                                </b-row>
+                                            </b-card>
+                                        </b-tab>
+                                    </b-tabs>
+                                </b-tabs>
+                            </b-card>
                         </div>
                     </template>
 
                 </template>
-
             </b-modal>
+
         </header>
         <a @click="logOut" class="btn btn-link log-out">LogOut</a>
     </div>
@@ -154,7 +221,8 @@
                 //submit
                 submit: '',
                 currentUserVisualizationData:[],
-                keyAndValueSelectedDatesObjectsArray:[]
+                keyAndValueSelectedDatesObjectsArray:[],
+                reducedObjectArrayForList: []
 
             };
         },
@@ -186,6 +254,7 @@
                     this.$router.push('/login');
                 });
             },
+
             refreshSearch(){
                 if(this.timeSelected !== undefined && this.timeSelected.length !== 0){
                     document.getElementById('actionSelector').removeAttribute("disabled");
@@ -198,7 +267,12 @@
                 else{
                     document.getElementById('dateToSelector').setAttribute("disabled", "disabled");
                 }
+
+                if(this.actionType === undefined){
+                    document.getElementById('actionSelector').setAttribute("disabled", "disabled");
+                }
             },
+
             //methods for the changing of the page elements
             onchangeTheme(){
                 console.log(this.themeSelector + " Theme selected");
@@ -242,6 +316,7 @@
                     console.log("timeSelectFrom -> " + this.timeSelectFrom)
 
             },
+
             onchangeDateFrom(){
                 this.dateTo = undefined;
                 this.timeSelectTo = undefined;
@@ -281,13 +356,9 @@
                     }
 
                     document.getElementById('actionSelector').removeAttribute("disabled");
-
-                    //call action function here ?
-                    //clear action selector array and selection too ...
-
                 }
-
             },
+
             onchangeDateTo(){
                 //console.log("Time selected between " + this.dateFrom + " and " + this.dateTo);
                 //logic: get the elements from timeSelectFrom where the elements are equal 'dateFrom' and all after that
@@ -306,9 +377,8 @@
 
                 document.getElementById('actionSelector').removeAttribute("disabled");
 
-
-
             },
+
             setupValidActionForAll(arrayProc){
                 //this.actionTypeList = undefined;
                 //logic:
@@ -357,13 +427,16 @@
 
                 //this.actionTypeList = [... allAction];
             },
+
             onchangeAction(){
               this.makeSubmitAvailable(this.actionType)
             },
+
             makeSubmitAvailable(action){
                 console.log(action)
                 document.getElementById('submitSearchBTN').removeAttribute('disabled');
             },
+
             async submitSearch(){
                 this.currentUserVisualizationData.length=0;
 
@@ -385,11 +458,11 @@
             calculateVisualizationData(resultObjectsArray){
 
                 this.keyAndValueSelectedDatesObjectsArray.length = 0;
-                console.log(resultObjectsArray)
+                //console.log(resultObjectsArray)
 
                 //get all dates without 'All Dates'
                 let allDates = [...this.timeSelected];
-                console.log("selected dates: " + allDates);
+                //console.log("selected dates: " + allDates);
 
 
                 //create an objects array with all the dates(timestamp) and count(value) them with 0
@@ -403,19 +476,19 @@
                 }
                 // eslint-disable-next-line no-unused-vars
                 // let keyAndValueSelectedDatesObjectsArray = allDates.map((str, index) => ({ timestamp: str, value: 0 }));
-                console.log(this.keyAndValueSelectedDatesObjectsArray);
+                //console.log(this.keyAndValueSelectedDatesObjectsArray);
 
                 for(let i = 0; i<this.keyAndValueSelectedDatesObjectsArray.length; i++){
 
                     delete this.keyAndValueSelectedDatesObjectsArray[i]['date'];
                     delete this.keyAndValueSelectedDatesObjectsArray[i]['value'];
-                    console.log(this.keyAndValueSelectedDatesObjectsArray[i].timestamp);
+                    //console.log(this.keyAndValueSelectedDatesObjectsArray[i].timestamp);
 
                     for(let j = 0; j<resultObjectsArray.length; j++) {
                         let date = "";
                         date = resultObjectsArray[j].timestamp.split(" ");
 
-                        console.log(date[0])
+                        //console.log(date[0])
 
                         if(this.keyAndValueSelectedDatesObjectsArray[i].timestamp === date[0]){
                             //console.log("same")
@@ -429,15 +502,131 @@
 
                 let data = [...this.keyAndValueSelectedDatesObjectsArray];
 
+                //reduce the dataset with key 'count' where value is 0
+                this.reducedObjectArrayForList = [...data].filter(function(e) { return e.count !== 0; });
+
+                this.clearSVGCharts()
+
                 this.setupGraphsBarChart(data)
 
                 this.setupGraphsLineChart(data)
 
-                this.setupGraphsPieChart(data)
+                this.setupGraphsPieChart(this.reducedObjectArrayForList)
             },
 
-            //need to be fixed, but works mostly
-            // eslint-disable-next-line no-unused-vars
+            clearSVGCharts(){
+                let barChart = document.getElementById("barChartVis");
+                let lineChart = document.getElementById("lineChartVis");
+                let pieChart = document.getElementById("pieChartVis");
+
+                if(barChart.hasChildNodes() ===true){
+                    barChart.removeChild(barChart.childNodes[0]);
+                }
+                if(lineChart.hasChildNodes() ===true){
+                    lineChart.removeChild(lineChart.childNodes[0]);
+                }
+                if(pieChart.hasChildNodes() ===true){
+                    pieChart.removeChild(pieChart.childNodes[0]);
+                }
+            },
+
+            // --- Bar Chart ---
+            setupGraphsBarChart(data){
+
+                console.log(data);
+
+                let maxcount = 0;
+                for(let i=0; i<data.length; i++){
+                    if(data[i].count > maxcount){
+                        maxcount = data[i].count;
+                    }
+                }
+
+                // chart dimensions
+                let margin = {top: 40, right: 40, bottom: 100, left: 40};
+                let width = 800 - margin.left - margin.right;
+                let height = 600 - margin.top - margin.bottom;
+                let default_ratio = width / height;
+
+
+                // Determine current size, which determines vars
+                function set_size() {
+                    let h =0;
+                    let w =0;
+
+                    let current_width = window.innerWidth;
+                    let current_height = window.innerHeight;
+                    let current_ratio = current_width / current_height;
+
+                    // desktop ratio
+                    if (current_ratio > default_ratio) {
+                        h = height;
+                        w = width;
+                    }
+                    // mobile
+                    else {
+                        w = current_width;
+                        h = w / default_ratio;
+                    }
+                    // Set new width and height taking margin into account
+                    width = w - margin.left - margin.right;
+                    height = h - margin.top - margin.bottom;
+                }
+
+                set_size();
+
+
+                // Scale the range of the data in the domains
+                // Set the ranges
+                let xScale = d3.scaleBand()
+                    .domain(data.map(function(d) { return d.timestamp; }))
+                    .range([0, width])
+                    .padding(0.2);
+
+                let yScale = d3.scaleLinear()
+                    .domain([0, d3.max(data, function(d) { return d.count; })])
+                    .range([height, 0]);
+
+                // append the svg object to the body of the page
+                // append a 'group' element to 'svg'
+                // moves the 'group' element to the top left margin
+                let svg = d3.select("#barChartVis").append("svg")
+                    .attr("id", "barChartSVG")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    // .style('background', '#bce8f1')
+                    .append("g")
+                    .attr('class', 'bar_g')
+                    .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+                // append the rectangles for the bar chart
+                svg.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d) { return xScale(d.timestamp); })
+                    .attr("width", xScale.bandwidth())
+                    .attr("y", function(d) { return yScale(d.count); })
+                    .attr("height", function(d) { return height - yScale(d.count); });
+
+                // add the x Axis
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale))
+                    .selectAll("text")
+                    .attr("y", 0)
+                    .attr("x", 9)
+                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(65)")
+                    .style("text-anchor", "start");
+                // add the y Axis
+                svg.append("g")
+                    .call(d3.axisLeft(yScale));
+
+    },
+
+            // --- Line Chart ---
             setupGraphsLineChart(data){
 
                 for(let i =0; i<data.length; i++){
@@ -453,23 +642,43 @@
                     }
                 }
 
-                // data.sort(function(a,b){
-                //     return new Date(b.date) - new Date(a.date);
-                // });
+                // chart dimensions
+                let margin = {top: 40, right: 40, bottom: 100, left: 40};
+                let width = 800 - margin.left - margin.right;
+                let height = 600 - margin.top - margin.bottom;
+                let default_ratio = width / height;
 
-                let height  = 500;
-                //70%
-                let width   = window.innerWidth/2;
-                // eslint-disable-next-line no-unused-vars
-                let hEach   = 40;
 
-                let margin = {top: 35, right: 50, bottom: 75, left: 25};
+                // Determine current size, which determines vars
+                // Determine current size, which determines vars
+                function set_size() {
+                    let h =0;
+                    let w =0;
 
-                width =     width - margin.left - margin.right;
-                height =    height - margin.top - margin.bottom;
+                    let current_width = window.innerWidth;
+                    let current_height = window.innerHeight;
+                    let current_ratio = current_width / current_height;
+
+                    // desktop ratio
+                    if (current_ratio > default_ratio) {
+                        h = height;
+                        w = width;
+                    }
+                    // mobile
+                    else {
+                        w = current_width;
+                        h = w / default_ratio;
+                    }
+                    // Set new width and height taking margin into account
+                    width = w - margin.left - margin.right;
+                    height = h - margin.top - margin.bottom;
+                }
+
+                set_size();
+
 
                 let svg = d3.select('#lineChartVis').append("svg")
-                    .attr("id", "lineChart")
+                    .attr("id", "lineChartSVG")
                     .attr("width",  width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
                     .append("g")
@@ -511,7 +720,7 @@
                     .style("text-anchor", "start");
 
                 //  Add the Y Axis
-                 svg.append("g").call(d3.axisLeft(y));
+                svg.append("g").call(d3.axisLeft(y));
 
                 svg.selectAll(".dot")
                     .data(data)
@@ -542,90 +751,66 @@
 
             },
 
-            setupGraphsBarChart(data){
+            // --- Pie Chart ---
+            setupGraphsPieChart(dataset){
 
-                console.log(data);
+                // chart dimensions
+                let margin = {top: 40, right: 40, bottom: 40, left: 40};
+                let width = 800 - margin.left - margin.right;
+                let height = 600 - margin.top - margin.bottom;
+                let default_ratio = width / height;
 
-                let maxcount = 0;
-                for(let i=0; i<data.length; i++){
-                    if(data[i].count > maxcount){
-                        maxcount = data[i].count;
+
+                // Determine current size, which determines vars
+                // Determine current size, which determines vars
+                function set_size() {
+                    let h =0;
+                    let w =0;
+
+                    let current_width = window.innerWidth;
+                    let current_height = window.innerHeight;
+                    let current_ratio = current_width / current_height;
+
+                    // desktop ratio
+                    if (current_ratio > default_ratio) {
+                        h = height;
+                        w = width;
                     }
+                    // mobile
+                    else {
+                        w = current_width;
+                        h = w / default_ratio;
+                    }
+                    // Set new width and height taking margin into account
+                    width = w - margin.left - margin.right;
+                    height = h - margin.top - margin.bottom;
                 }
 
-                // set the dimensions and margins of the graph
-                let margin = {top: 20, right: 20, bottom: 30, left: 40},
-                    width = window.innerWidth/2 - margin.left - margin.right,
-                    height = 500 - margin.top - margin.bottom;
-
-                // Scale the range of the data in the domains
-                // Set the ranges
-                let xScale = d3.scaleBand()
-                    .domain(data.map(function(d) { return d.timestamp; }))
-                    .range([0, width])
-                    .padding(0.2);
-
-                let yScale = d3.scaleLinear()
-                    .domain([0, d3.max(data, function(d) { return d.count; })])
-                    .range([height, 0]);
-
-                // append the svg object to the body of the page
-                // append a 'group' element to 'svg'
-                // moves the 'group' element to the top left margin
-                let svg = d3.select("#barChartVis").append("svg")
-                    .attr("id", "barChart")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    // .style('background', '#bce8f1')
-                    .append("g")
-                    .attr('class', 'bar_g')
-                    .attr("transform",
-                        "translate(" + margin.left + "," + margin.top + ")");
-
-                // append the rectangles for the bar chart
-                svg.selectAll(".bar")
-                    .data(data)
-                    .enter().append("rect")
-                    .attr("class", "bar")
-                    .attr("x", function(d) { return xScale(d.timestamp); })
-                    .attr("width", xScale.bandwidth())
-                    .attr("y", function(d) { return yScale(d.count); })
-                    .attr("height", function(d) { return height - yScale(d.count); });
-
-                // add the x Axis
-                svg.append("g")
-                    .attr("transform", "translate(0," + height + ")")
-                    .call(d3.axisBottom(xScale));
-                // add the y Axis
-                svg.append("g")
-                    .call(d3.axisLeft(yScale));
-
-    },
-
-            setupGraphsPieChart(data){
-
-                let dataset = [...data]
-                // chart dimensions
-                let width = 800;
-                let height = 500;
+                set_size();
 
                 // a circle chart needs a radius
-                let radius = Math.min(width, height) / 2;
+                let radius = Math.min(width, height) / 2.5;
 
                 // legend dimensions
                 // defines the size of the colored squares in legend
-                let legendRectSize = 20;
+                let legendRectSize = 15;
                 // defines spacing between squares
                 let legendSpacing = 5;
 
                 // define color scale
-                let color = d3.scaleOrdinal([`#383867`, `#584c77`, `#33431e`, `#a36629`, `#92462f`, `#b63e36`, `#b74a70`, `#946943`])
+                let color = d3.scaleOrdinal([
+                    `#0ee3ea`, `#5208f6`, `#33431e`, `#a36629`,
+                    `#92462f`, `#b63e36`, `#b74a70`, `#946943`,
+                    `#cb3707`, `#f66110`, `#de1459`, `#a15109`,
+                    `#debb06`, `#f50303`, `#db04f3`, `#a15109`])
                 // more color scales: https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9
 
                 // select element in the DOM with id 'pieChartVis'
                 let svg = d3.select('#pieChartVis')
                     // append an svg element to the element we've selected
                     .append('svg')
+                    // set an 'id' for svg element
+                    .attr("id", "pieChartSVG")
                     // set the width of the svg element we just added
                     .attr('width', width)
                     // set the height of the svg element we just added
@@ -633,11 +818,11 @@
                     // append 'g' element to the svg element
                     .append('g')
                     // our reference is now to the 'g' element. centering the 'g' element to the svg element
-                    .attr('transform', 'translate(' + (width / 3) + ',' + (height / 2) + ')');
+                    .attr('transform', 'translate(' + (width / 2.5) + ',' + (height / 2.5) + ')');
 
                 let arc = d3.arc()
                     // 0 for pie chart
-                    .innerRadius(radius/5)
+                    .innerRadius(0)
                     // size of overall chart
                     .outerRadius(radius);
 
@@ -651,7 +836,7 @@
 
                 dataset.forEach(function(d) {
                     // calculate count as we iterate through the data
-                    d.count = +d.count;
+                    //d.count = +d.count;
                     // add enabled property to track which entries are checked
                     d.enabled = true;
                 });
@@ -670,15 +855,16 @@
                     .append('path')
                     // define d attribute with arc function above
                     .attr('d', arc)
+                    // style of slices
+                    .style('stroke', 'white')
                     // use color scale to define fill of each label in dataset
                     .attr('fill', function(d) { return color(d.data.timestamp); })
                     // creates a smooth animation for each track
                     .each(function(d) { this._current - d; });
 
 
-
                 // define legend
-                var legend = svg
+                let legend = svg
                     // selecting elements with class 'legend'
                     .selectAll('.legend')
                     // refers to an array of labels from our dataset
@@ -714,7 +900,7 @@
                     // each fill is passed a color
                     .style('fill', color)
                     // each stroke is passed a color
-                    .style('stroke', color)
+                    .style('stroke', 'black')
                     .on('click', function(label) {
                         // this refers to the colored squared just clicked
                         let rect = d3.select(this);
@@ -722,8 +908,11 @@
                         let enabled = true;
                         // can't disable all options
                         let totalEnabled = d3.sum(dataset.map(function(d) {
-                            // return 1 for each enabled entry. and summing it up
-                            return (d.enabled) ? 1 : 0;
+                            if(d.count !==0){
+                                // return 1 for each enabled entry. and summing it up
+                                return (d.enabled) ? 1 : 0;
+                            }
+
                         }));
 
                         // if class is disabled
@@ -774,7 +963,15 @@
             },
 
             baseDashboardChanges(){
+                this.dateFrom= undefined;
+                this.dateTo= undefined;
+                this.actionType = undefined;
+
+
+
                 this.themeSelector = '0';
+                this.keyAndValueSelectedDatesObjectsArray = [];
+                this.reducedObjectArrayForList = [];
             }
 
         }
@@ -791,6 +988,7 @@
     }
     .modal-fullscreen .modal-dialog {
         max-width: 100%;
+        min-width: 1074px;
         margin: 0;
         top: 0;
         bottom: 0;
@@ -800,6 +998,7 @@
         display: flex;
         position: fixed;
         z-index: 100000;
+        color: black;
     }
     hr{
         margin-top: 0.4rem;
@@ -815,7 +1014,7 @@
     */
     .line {
         fill: none;
-        stroke: #ffab00;
+        stroke: #0246cd;
         stroke-width: 3;
     }
     .axis path,
@@ -850,35 +1049,44 @@
     }
     rect {
         cursor: pointer;
-        stroke-width: 2;
+        stroke-width: 3;
     }
     rect.disabled {
         fill: transparent !important;
     }
 
-    /* chart */
-    #pieChartVis {
-        height: 800px;
-        margin: 0 auto;
-        position: relative;
-        display: block;
-        width: 1200px;
+    .cardWithDates{
+        max-height: 30vh;
+        /*margin-bottom: 10px;*/
+        overflow-y:scroll;
+        -webkit-overflow-scrolling: touch;
     }
 
-    /* tooltip */
-    .tooltip {
-        background: #eee;
-        box-shadow: 0 0 5px #999999;
-        color: #333;
-        display: none;
-        font-size: 18px;
-        left: 130px;
-        padding: 10px;
-        position: absolute;
-        text-align: center;
-        top: 95px;
-        width: 80px;
-        z-index: 10;
+    #visArea a{
+       color: black;
+    }
+
+    /* chart */
+    #pieChartVis {
+        position: relative;
+        display: block;
+    }
+
+    .card{
+        padding:0;
+    }
+    #modal-xl___BV_modal_content_{
+        overflow-y: scroll;
+    }
+
+    section {
+        /*padding: 1em;*/
+        /*border: 3px black solid;*/
+        float: left;
+    }
+
+    #lineChartSVG, #barChartSVG,#pieChartSVG{
+        margin: 1em;
     }
 
 </style>

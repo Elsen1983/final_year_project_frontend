@@ -1,9 +1,9 @@
 <template>
     <div>
-        <nav class="navbar navbar-expand navbar-dark bg-dark">
-            <a href="https://vuejs.org/" class="navbar-brand">
-                <img src="./assets/logo.png" width="30" height="30" class="d-inline-block align-top"/>
-                Vue.js
+        <nav class="navbar navbar-expand">
+            <a href="https://www.xmldation.com/en/" class="navbar-brand">
+                <img src="./assets/xmldation.png" width="30" height="30" class="d-inline-block align-top"/>
+                XMLdation
             </a>
             <div class="navbar-nav mr-auto">
                 <li class="nav-item" v-if="isAdmin">
@@ -26,7 +26,7 @@
             </div>
             <div class="navbar-nav ml-auto" v-if="currentUser">
                 <li class="nav-item">
-                    <a href="/profile" class="nav-link">
+                    <a href="/userdata" class="nav-link">
                         <font-awesome-icon icon="user"/> {{currentUser.name}}
                     </a>
                 </li>
@@ -37,6 +37,7 @@
                 </li>
             </div>
         </nav>
+
         <div class="container">
             <div class="row">
                 <div class="col-sm-6 offset-sm-3">
@@ -107,7 +108,31 @@
 
     }
 </script>
-
-
 <style>
+
+    body{
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        /* min-height: 40vw; */
+        background: url(assets/xmldation_background.png) bottom 0 right 0 no-repeat #4D4D4F;
+        background-size: auto 75%;
+        color: black;
+    }
+
+    .navbar{
+        background-color: rgb(43,60,67);
+    }
+
+    a {
+        color: white;
+        text-decoration: none;
+    }
+
+    a:hover
+    {
+        color:#00A0C6;
+        text-decoration:none;
+        cursor:pointer;
+    }
 </style>
