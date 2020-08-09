@@ -14,7 +14,7 @@
             <!--        Modal header        -->
                 <template v-slot:modal-header="{ close }">
                     <template class="modal-title">
-                        <h4><strong>Client Dashboard</strong> [{{currentUser.name}}]</h4>
+                        <h3><strong>Client Dashboard</strong> [{{currentUser.name}}]</h3>
                     </template>
 
                     <!-- Emulate built in modal header close button action -->
@@ -24,66 +24,87 @@
 
                 </template>
                 <template v-slot:default id="dashboardContainer">
-                    <b-row class="mb-1">
+                    <b-row >
                         <b-col cols="3">Select theme for Dashboard</b-col>
                         <b-col cols="3">
-                            <label>
-                                <b-form-select v-model="themeSelector" @change="onchangeTheme()" class="form-control form-control-sm">
-                                    <option :key="index" :value="t" v-for="(t, index) in variants">{{t}}</option>
-                                </b-form-select>
-                            </label>
+                                    <b-form-select v-model="themeSelector" @change="onchangeTheme()" class="form-control form-control-sm">
+                                        <!-- This slot appears above the options from 'options' prop -->
+                                        <option :value="undefined" disabled style="display:none">-- Please select a theme --</option>
+                                        <!-- These options will appear after the ones from 'options' prop -->
+                                        <option :key="index" :value="t" v-for="(t, index) in variants">{{t}}</option>
+                                    </b-form-select>
                         </b-col>
                     </b-row>
                     
-                    <hr class="m-0 pt-0">
+                    <hr class="mb-2 mt-2 pt-0 hr-separators">
 
                     <!--         SIDEBAR FOR SEARCHING PARAMETERS           -->
                     <b-button v-b-toggle.sidebar-no-header variant="warning" @click="refreshSearch()">Searching parameters </b-button>
-                    <b-sidebar id="sidebar-no-header" aria-labelledby="sidebar-no-header-title" width="35vw" height="50vh" sidebar-class="border-right border-danger" no-header shadow>
+                    <b-sidebar  id="sidebar-no-header" aria-labelledby="sidebar-no-header-title" title="Search Parameters"
+                                sidebar-class="border-right border-danger" bg-variant="dark" text-variant="light"
+                                width="30vw" height="100vh"
+                                >
                         <template v-slot:default="{ hide }">
-                            <form name="form" @submit.prevent="submitSearch">
+                            <form name="form" @submit.prevent="submitSearch" class="mt-2em">
+                                <hr class="hr-separators">
                                 <div class="p-3">
-                                    <b-row>
+                                    <b-row class="mt-4">
                                         <b-col cols="12">Please select the options below for visualize your data.</b-col>
                                     </b-row>
-                                    <b-row >
-                                        <b-col cols="4">
+
+                                    <b-row class="mt-4">
+                                        <b-col cols="6">Date FROM</b-col>
+                                        <b-col cols="6">Date TO</b-col>
+                                    </b-row>
+                                    <b-row>
+                                        <b-col cols="6">
                                             <b-form-select @change="onchangeDateFrom()" class="form-control form-control-sm" v-model="dateFrom">
                                                 <option :value="undefined" disabled style="display:none">Select date FROM</option>
                                                 <option :key="index" :value="t" v-for="(t, index) in timeSelectFrom">{{t}}</option>
                                             </b-form-select>
                                         </b-col>
-                                        <b-col cols="4">
+                                        <b-col cols="6">
                                             <b-form-select id="dateToSelector" disabled @change="onchangeDateTo()" class="form-control form-control-sm" v-model="dateTo">
                                                 <option :value="undefined" disabled style="display:none">Select date TO</option>
                                                 <option :key="index" :value="t" v-for="(t, index) in timeSelectTo">{{t}}</option>
                                             </b-form-select>
-
                                         </b-col>
                                     </b-row>
-                                    <div class="mb-3" v-if="timeSelected !== undefined && timeSelected.length !== 0 "><strong>Selected date(s):</strong> {{ timeSelected.join(" - ") }}</div>
+<!--                                    <div class="mb-3" v-if="timeSelected !== undefined && timeSelected.length !== 0 "><strong>Selected date(s):</strong> {{ timeSelected.join(" - ") }}</div>-->
+                                    <b-row class="mt-4">
+                                        <b-col cols="6">Type of action</b-col>
+                                    </b-row>
                                     <b-row>
-                                        <b-col cols="4">
+                                        <b-col cols="6">
                                             <template>
                                                 <div>
                                                     <b-form-select id="actionSelector" @change="onchangeAction()" v-model="actionType" :options="actionTypeList" class="form-control form-control-sm">
                                                         <option :value="undefined" disabled style="display:none">Select type of action</option>
                                                     </b-form-select>
-                                                    <div class="mt-3">Selected: <strong>{{ actionType }}</strong></div>
+<!--                                                    <div class="mt-3">Selected: <strong>{{ actionType }}</strong></div>-->
                                                 </div>
                                             </template>
                                         </b-col>
                                     </b-row>
 
-                                        <button id="submitSearchBTN" class="btn btn-success btn-block"  disabled><span class="spinner-border spinner-border-sm" v-show="submit"></span>
-                                            <span>Submit Search</span>
-                                        </button>
-
-                                    <b-button variant="primary" block @click="hide">Close Sidebar</b-button>
+                                    <b-row class="mt-4 mb-2">
+                                        <b-col cols="12">After selected the visualization parameters, please press the "Submit" button.</b-col>
+                                    </b-row>
+                                    <hr class="hr-separators">
+                                    <button id="submitSearchBTN" class="btn btn-success btn-block mt-2" @click="hide" disabled><span class="spinner-border spinner-border-sm" v-show="submit"></span>
+                                        <span>Submit Search</span>
+                                    </button>
+<!--                                    <b-button variant="primary" block @click="hide">Close Sidebar</b-button>-->
                                 </div>
                             </form>
+                            <div class="d-flex bg-dark text-light align-items-right px-3 py-2" id="sidebarCloseBTN">
+                                <b-button class="btn btn-warning btn-block" @click="hide">Close</b-button>
+                            </div>
                         </template>
+
                     </b-sidebar>
+
+                    <!--          Visualization area(s)          -->
                     <template>
                         <div id="visArea">
                             <b-card no-body class="mt-1">
@@ -99,24 +120,32 @@
                                                  Bar Chart
                                             </template>
 
-                                            <b-card class="overflow-hidden" style="max-width: 1920px; min-width: 1024px;">
+                                            <b-card class="visMainArea overflow-hidden justify-content-md-center text-center" align-v="center" >
                                                 <b-row no-gutters>
+                                                    <b-col md="1">
+                                                    </b-col>
                                                     <b-col md="8">
                                                         <section id="barChartVis">
                                                             <b-img width="800px" fluid src="../assets/datavisualization.png" alt="Image 1"></b-img>
                                                         </section>
                                                     </b-col>
-                                                    <b-col md="4" class="float-left">
-                                                        <b-card no-body class="cardWithDates mb-1" header="Card with list group">
+                                                    <b-col md="2">
+                                                        <b-card no-body class="cardWithDates mb-1" header="Selected dates">
+                                                                <b-card-text text="black" class="detailsText">For more details click on it.</b-card-text>
                                                                 <b-card-header header-tag="header" class="p-1" role="tab" v-for="(item, idx) in reducedObjectArrayForList" :key="idx">
                                                                     <b-button block v-b-toggle="'accordion-' + idx" variant="info">{{item.timestamp.toLocaleDateString() }}</b-button>
                                                                     <b-collapse :id="'accordion-' + idx"  :accordion="'my-accordion'" role="tabpanel">
-                                                                        <b-card-body>
-                                                                            <b-card-text>{{ item.count}}</b-card-text>
+                                                                        <b-card-body class="detailsCardBody">
+                                                                            <b-card-text>Action executed by <strong>{{currentUser.name}}</strong> (<i>{{currentUser.username}}</i>).</b-card-text>
+                                                                            <b-card-text>Selected date: <strong>{{item.timestamp.toLocaleDateString()}}</strong>.</b-card-text>
+                                                                            <b-card-text >{{actionType.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); })}} happened <strong>{{item.count}}</strong> time(s) on this date.</b-card-text>
                                                                         </b-card-body>
                                                                     </b-collapse>
                                                                 </b-card-header>
                                                         </b-card>
+                                                    </b-col>
+                                                    <b-col md="1">
+
                                                     </b-col>
                                                 </b-row>
                                             </b-card>
@@ -126,24 +155,31 @@
                                                 <b-img width="40px" fluid src="../assets/linechart_icon.png" alt="Image 1"></b-img>
                                                 Line Chart
                                             </template>
-                                            <b-card class="overflow-hidden" style="max-width: 1920px; min-width: 1024px;">
+                                            <b-card class="visMainArea overflow-hidden justify-content-md-center text-center" align-v="center">
                                                 <b-row no-gutters>
+                                                    <b-col md="1">
+                                                    </b-col>
                                                     <b-col md="8">
                                                         <section id="lineChartVis">
                                                             <b-img width="800px" fluid src="../assets/datavisualization.png" alt="Image 1"></b-img>
                                                         </section>
                                                     </b-col>
-                                                    <b-col md="4" class="float-left">
-                                                        <b-card no-body class="cardWithDates mb-1" header="Card with list group">
+                                                    <b-col md="2">
+                                                        <b-card no-body class="cardWithDates mb-1" header="Selected dates">
+                                                            <b-card-text class="detailsText">For more details click on it.</b-card-text>
                                                             <b-card-header header-tag="header" class="p-1" role="tab" v-for="(item, idx) in reducedObjectArrayForList" :key="idx">
                                                                 <b-button block v-b-toggle="'accordion-' + idx" variant="info">{{item.timestamp.toLocaleDateString() }}</b-button>
                                                                 <b-collapse :id="'accordion-' + idx"  :accordion="'my-accordion'" role="tabpanel">
-                                                                    <b-card-body>
-                                                                        <b-card-text>{{ item.count}}</b-card-text>
+                                                                    <b-card-body class="detailsCardBody">
+                                                                        <b-card-text>Action executed by <strong>{{currentUser.name}}</strong> (<i>{{currentUser.username}}</i>).</b-card-text>
+                                                                        <b-card-text>Selected date: <strong>{{item.timestamp.toLocaleDateString()}}</strong>.</b-card-text>
+                                                                        <b-card-text >{{actionType.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); })}} happened <strong>{{item.count}}</strong> time(s) on this date.</b-card-text>
                                                                     </b-card-body>
                                                                 </b-collapse>
                                                             </b-card-header>
                                                         </b-card>
+                                                    </b-col>
+                                                    <b-col md="1">
                                                     </b-col>
                                                 </b-row>
                                             </b-card>
@@ -153,24 +189,31 @@
                                                 <b-img width="40px" fluid src="../assets/piechart_icon.png" alt="Image 1"></b-img>
                                                 Pie Chart
                                             </template>
-                                            <b-card class="overflow-hidden" style="max-width: 1920px; min-width: 1024px;">
+                                            <b-card class="visMainArea overflow-hidden justify-content-md-center text-center" align-v="center">
                                                 <b-row no-gutters>
+                                                    <b-col md="1">
+                                                    </b-col>
                                                     <b-col md="8">
                                                         <section id="pieChartVis">
                                                             <b-img width="800px" fluid src="../assets/datavisualization.png" alt="Image 1"></b-img>
                                                         </section>
                                                     </b-col>
-                                                    <b-col md="4" class="float-left">
-                                                        <b-card no-body class="cardWithDates mb-1" header="Card with list group">
+                                                    <b-col md="2">
+                                                        <b-card no-body class="cardWithDates mb-1" header="Selected dates">
+                                                            <b-card-text class="detailsText">For more details click on it.</b-card-text>
                                                             <b-card-header header-tag="header" class="p-1" role="tab" v-for="(item, idx) in reducedObjectArrayForList" :key="idx">
                                                                 <b-button block v-b-toggle="'accordion-' + idx" variant="info">{{item.timestamp.toLocaleDateString() }}</b-button>
                                                                 <b-collapse :id="'accordion-' + idx"  :accordion="'my-accordion'" role="tabpanel">
-                                                                    <b-card-body>
-                                                                        <b-card-text>{{ item.count}}</b-card-text>
+                                                                    <b-card-body class="detailsCardBody">
+                                                                        <b-card-text>Action executed by <strong>{{currentUser.name}}</strong> (<i>{{currentUser.username}}</i>).</b-card-text>
+                                                                        <b-card-text>Selected date: <strong>{{item.timestamp.toLocaleDateString()}}</strong>.</b-card-text>
+                                                                        <b-card-text >{{actionType.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); })}} happened <strong>{{item.count}}</strong> time(s) on this date.</b-card-text>
                                                                     </b-card-body>
                                                                 </b-collapse>
                                                             </b-card-header>
                                                         </b-card>
+                                                    </b-col>
+                                                    <b-col md="1">
                                                     </b-col>
                                                 </b-row>
                                             </b-card>
@@ -202,7 +245,7 @@
                 //theme
                 show: false,
                 variants: ['Light','Dark','Colorful'],
-                themeSelector:'0',
+                themeSelector: undefined,
                 styleRoute: "../assets/style/lightTheme.css",
                 //
                 getData: '',
@@ -497,6 +540,7 @@
                     }
                 }
 
+                //time to close sidebar
 
                 console.log(this.keyAndValueSelectedDatesObjectsArray)
 
@@ -507,9 +551,9 @@
 
                 this.clearSVGCharts()
 
-                this.setupGraphsBarChart(data)
+                this.setupGraphsBarChart(this.reducedObjectArrayForList)
 
-                this.setupGraphsLineChart(data)
+                this.setupGraphsLineChart(this.reducedObjectArrayForList)
 
                 this.setupGraphsPieChart(this.reducedObjectArrayForList)
             },
@@ -592,6 +636,11 @@
                 // moves the 'group' element to the top left margin
                 let svg = d3.select("#barChartVis").append("svg")
                     .attr("id", "barChartSVG")
+                    .attr("style",
+                        "-webkit-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "-moz-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "outline: thin solid black;")
                     .attr("width", width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
                     // .style('background', '#bce8f1')
@@ -679,6 +728,11 @@
 
                 let svg = d3.select('#lineChartVis').append("svg")
                     .attr("id", "lineChartSVG")
+                    .attr("style",
+                        "-webkit-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "-moz-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "outline: thin solid black;")
                     .attr("width",  width + margin.left + margin.right)
                     .attr("height", height + margin.top + margin.bottom)
                     .append("g")
@@ -811,6 +865,12 @@
                     .append('svg')
                     // set an 'id' for svg element
                     .attr("id", "pieChartSVG")
+                    .attr("style",
+                        "padding-top: 2.5em; " +
+                        "-webkit-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "-moz-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);" +
+                        "outline: thin solid black;")
                     // set the width of the svg element we just added
                     .attr('width', width)
                     // set the height of the svg element we just added
@@ -967,9 +1027,8 @@
                 this.dateTo= undefined;
                 this.actionType = undefined;
 
+                this.themeSelector = undefined;
 
-
-                this.themeSelector = '0';
                 this.keyAndValueSelectedDatesObjectsArray = [];
                 this.reducedObjectArrayForList = [];
             }
@@ -1004,9 +1063,29 @@
         margin-top: 0.4rem;
         margin-bottom: 0.2rem;
     }
+    .hr-separators{
+        color: #ff9900;
+        border: #ff9900 1px solid;
+    }
 
     .b-sidebar {
-        height: 75vh !important;
+        padding-top: 2em;
+        min-width: 200px !important;
+        /*height: 75vh !important;*/
+    }
+
+    #sidebarCloseBTN{
+        position: absolute;
+        top: 2em;
+        right: 1em;
+        width: 20%;
+    }
+
+    /*
+    Bar Chart Style
+    */
+    .bar {
+        fill: #319bbe;
     }
 
     /*
@@ -1056,14 +1135,41 @@
     }
 
     .cardWithDates{
-        max-height: 30vh;
+        max-height: 460px;
+        max-width: 300px;
+        margin: 15px 0 0;
         /*margin-bottom: 10px;*/
         overflow-y:scroll;
         -webkit-overflow-scrolling: touch;
+
+        -webkit-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);
+        -moz-box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);
+        box-shadow: 9px 10px 22px 1px rgba(0,0,0,0.58);
+        outline: thin solid black;
+
     }
 
+    .visMainArea{
+        background-color: white;
+        max-width: 1920px;
+        min-width: 1280px;
+        min-height: 60vh;
+        border: 2px solid #908d8d;
+        margin-top: 1em;
+    }
+
+    #visArea{
+        min-width: 1280px;
+        overflow: hidden;
+    }
     #visArea a{
        color: black;
+    }
+
+    #visArea .card-body {
+        flex: 0;
+        min-height: 1px;
+        padding: 1.25rem;
     }
 
     /* chart */
@@ -1077,6 +1183,16 @@
     }
     #modal-xl___BV_modal_content_{
         overflow-y: scroll;
+    }
+
+    .detailsText{
+        padding-left: 1em;
+    }
+
+    .detailsCardBody{
+        flex: 1 1 auto;
+        font-size: 13px;
+        color: black;
     }
 
     section {
