@@ -25,7 +25,7 @@
                 </template>
                 <template v-slot:default id="dashboardContainer">
                     <b-row >
-                        <b-col cols="3">Select theme for Dashboard</b-col>
+                        <b-col cols="3"><strong>Select theme for Dashboard</strong></b-col>
                         <b-col cols="3">
                                     <b-form-select v-model="themeSelector" @change="onchangeTheme()" class="form-control form-control-sm">
                                         <!-- This slot appears above the options from 'options' prop -->
@@ -39,9 +39,9 @@
                     <hr class="mb-2 mt-2 pt-0 hr-separators">
 
                     <!--         SIDEBAR FOR SEARCHING PARAMETERS           -->
-                    <b-button v-b-toggle.sidebar-no-header variant="warning" @click="refreshSearch()">Searching parameters </b-button>
+                    <b-button v-b-toggle.sidebar-no-header variant="warning" class="mt-1 mb-1" style="border: 1px solid black" @click="refreshSearch()"><strong>Searching parameters</strong></b-button>
                     <b-sidebar  id="sidebar-no-header" aria-labelledby="sidebar-no-header-title" title="Search Parameters"
-                                sidebar-class="border-right border-danger" bg-variant="dark" text-variant="light"
+                                sidebar-class="border-right border-warning" bg-variant="dark" text-variant="light"
                                 width="30vw" height="100vh"
                                 >
                         <template v-slot:default="{ hide }">
@@ -111,13 +111,14 @@
                                 <b-tabs card>
                                     <b-tabs
                                             active-nav-item-class="font-weight-bold text-uppercase text-danger"
-                                            active-tab-class="font-weight-bold text-success"
+                                            active-tab-class="font-weight-bold text-dark"
                                             content-class="mt-3"
+                                            id="tabsArea"
                                     >
                                         <b-tab active>
-                                            <template v-slot:title class="chartTab">
-                                                <b-img width="40px" fluid src="../assets/barchart_icon.png" alt="Image 1"></b-img>
-                                                 Bar Chart
+                                            <template v-slot:title id="chartTab">
+                                                <b-img id="barChartIcon" width="40px" fluid src="../assets/barchart_icon_white.png" alt="Image 1"></b-img>
+                                                <strong>Bar Chart</strong>
                                             </template>
 
                                             <b-card class="visMainArea overflow-hidden justify-content-md-center text-center" align-v="center" >
@@ -145,15 +146,22 @@
                                                         </b-card>
                                                     </b-col>
                                                     <b-col md="1">
-
                                                     </b-col>
                                                 </b-row>
+                                                <b-row>
+                                                    <b-col md="1"></b-col>
+                                                    <b-col md="8">
+                                                        <b-button style="width: 720px; margin: 1em;" class="btn btn-warning btn-block" @click="print('bar')">Download</b-button>
+                                                    </b-col>
+                                                    <b-col md="3"></b-col>
+                                                </b-row>
                                             </b-card>
+
                                         </b-tab>
                                         <b-tab >
                                             <template v-slot:title class="chartTab">
-                                                <b-img width="40px" fluid src="../assets/linechart_icon.png" alt="Image 1"></b-img>
-                                                Line Chart
+                                                <b-img id="lineChartIcon" width="40px" fluid src="../assets/linechart_icon_white.png" alt="Image 1"></b-img>
+                                                <strong>Line Chart</strong>
                                             </template>
                                             <b-card class="visMainArea overflow-hidden justify-content-md-center text-center" align-v="center">
                                                 <b-row no-gutters>
@@ -182,12 +190,19 @@
                                                     <b-col md="1">
                                                     </b-col>
                                                 </b-row>
+                                                <b-row>
+                                                    <b-col md="1"></b-col>
+                                                    <b-col md="8">
+                                                        <b-button style="width: 720px; margin: 1em;" class="btn btn-warning btn-block" @click="print('line')">Download</b-button>
+                                                    </b-col>
+                                                    <b-col md="3"></b-col>
+                                                </b-row>
                                             </b-card>
                                         </b-tab>
                                         <b-tab>
                                             <template v-slot:title class="chartTab">
-                                                <b-img width="40px" fluid src="../assets/piechart_icon.png" alt="Image 1"></b-img>
-                                                Pie Chart
+                                                <b-img id="pieChartIcon" width="40px" fluid src="../assets/piechart_icon_white.png" alt="Image 1"></b-img>
+                                                <strong>Pie Chart</strong>
                                             </template>
                                             <b-card class="visMainArea overflow-hidden justify-content-md-center text-center" align-v="center">
                                                 <b-row no-gutters>
@@ -213,14 +228,22 @@
                                                             </b-card-header>
                                                         </b-card>
                                                     </b-col>
-                                                    <b-col md="1">
+                                                    <b-col md="1"></b-col>
+                                                </b-row>
+                                                <b-row>
+                                                    <b-col md="1"></b-col>
+                                                    <b-col md="8">
+                                                        <b-button style="width: 720px; margin: 1em;" class="btn btn-warning btn-block" @click="print('pie')">Download</b-button>
                                                     </b-col>
+                                                    <b-col md="3"></b-col>
                                                 </b-row>
                                             </b-card>
                                         </b-tab>
                                     </b-tabs>
                                 </b-tabs>
+
                             </b-card>
+
                         </div>
                     </template>
 
@@ -236,6 +259,9 @@
     import User from "../models/user";
     // eslint-disable-next-line no-unused-vars
     import * as d3 from 'd3';
+    import html2canvas from "html2canvas";
+    import * as jsPDF from "jspdf";
+    //import canvg from 'canvg';
     export default {
         name: 'userdata',
         data() {
@@ -244,7 +270,7 @@
                 currentUserBasicData: [],
                 //theme
                 show: false,
-                variants: ['Light','Dark','Colorful'],
+                variants: ['Light (Default)','Dark'],
                 themeSelector: undefined,
                 styleRoute: "../assets/style/lightTheme.css",
                 //
@@ -279,8 +305,6 @@
             this.currentUserBasicData = UserService.currentUserBasicDataValue;
             //console.log(this.currentUserBasicData);
 
-
-
             //logOut the user when refreshing a page
             if(this.currentUserBasicData !== null) {
                 console.log("Setup all dates for selection");
@@ -288,6 +312,7 @@
             }else{
                 this.logOut();
             }
+
         },
         mounted() {
         },
@@ -319,22 +344,90 @@
             //methods for the changing of the page elements
             onchangeTheme(){
                 console.log(this.themeSelector + " Theme selected");
+
+                ///img/barchart_icon.7cae0ef1.png
+                //  barChartIcon src --> black:https://i.ibb.co/0MMPNK4/barchart-icon.png    white: https://i.ibb.co/R79cBq0/barchart-icon-white.png
+                //  lineChartIcon src --> black: https://i.ibb.co/C8fpxfT/linechart-icon.png white: https://i.ibb.co/GsGZxCQ/linechart-icon-white.png
+                //  pieChartIcon src --> black: https://i.ibb.co/bzqNWb9/piechart-icon.png white: https://i.ibb.co/n8qCmDs/piechart-icon-white.png
+
                 switch (this.themeSelector) {
-                    case "Light":
-                        themeChanger("#acc5e0");
+                    case "Light (Default)":
+                        this.themeChanger(
+                            "#e7e6e6",
+                            '#000000',
+                            '#ffffff',
+                            '#000000',
+                            '#efefef',
+                            '#000000',
+                            '#000000',
+                            "https://i.ibb.co/0MMPNK4/barchart-icon.png",
+                            "https://i.ibb.co/C8fpxfT/linechart-icon.png",
+                            "https://i.ibb.co/bzqNWb9/piechart-icon.png",
+                            'rgba(241,240,240,0.61)',
+                            '#e2e2e2');
                         break;
                     case "Dark":
-                        themeChanger("#101f2f");
-                        break;
-                    case "Colorful":
-                        themeChanger("#88d758");
+                        this.themeChanger(
+                            "#2B3C43",
+                            '#ffffff',
+                            '#4D4D4F',
+                            '#ffffff',
+                            '#868686',
+                            '#000000',
+                            '#fcfcfc',
+                            "https://i.ibb.co/R79cBq0/barchart-icon-white.png",
+                            "https://i.ibb.co/GsGZxCQ/linechart-icon-white.png",
+                            "https://i.ibb.co/n8qCmDs/piechart-icon-white.png",
+                            'rgba(134,134,134,0.61)',
+                            'rgb(162 162 162)');
                         break;
                     default:
                     // code block
                 }
-                function themeChanger(background) {
-                    document.getElementById('modal-xl___BV_modal_content_').style.backgroundColor = background;
-                }
+
+            },
+
+            themeChanger(modal_header, modal_header_text, modal_body, modal_body_text, tabs_area, tabs_area_border,
+                         tab_area_text, barChart_icon_color, lineChart_icon_color, pieChart_icon_color,
+                         tab_controls, tab_car_header_body) {
+                setTimeout(function(){
+                    document.getElementById('modal-xl___BV_modal_header_').style.backgroundColor = modal_header;
+                    document.getElementById('modal-xl___BV_modal_header_').style.color = modal_header_text;
+                    document.getElementById('modal-xl___BV_modal_body_').style.backgroundColor = modal_body;
+                    document.getElementById('modal-xl___BV_modal_body_').style.color = modal_body_text;
+                    let tabs_li = document.querySelectorAll('#tabsArea__BV_tab_controls_ li');
+                    for(let i = 0; i<tabs_li.length; i++){
+                        tabs_li[i].style.backgroundColor = tabs_area;
+                        tabs_li[i].style.border = '1px solid' + tabs_area_border;
+                    }
+                    let tabs_li_a = document.querySelectorAll('#visArea a');
+                    for(let i = 0; i<tabs_li_a.length; i++){
+                        tabs_li_a[i].style.color = tab_area_text;
+                    }
+
+                    //tabsArea__BV_tab_container_
+                    let tabPanel= document.getElementById('tabsArea__BV_tab_container_').firstElementChild;
+                    tabPanel.style.backgroundColor = tab_car_header_body;
+
+                    document.getElementById('barChartIcon').setAttribute('src', barChart_icon_color)
+                    document.getElementById('lineChartIcon').setAttribute('src', lineChart_icon_color)
+                    document.getElementById('pieChartIcon').setAttribute('src', pieChart_icon_color)
+                    document.getElementById('tabsArea__BV_tab_controls_').style.backgroundColor = tab_controls;
+                    document.getElementById('tabsArea__BV_tab_controls_').style.borderBottom = '1px solid' + tabs_area_border;
+
+
+                    let visArea = document.getElementById('visArea');
+                    let cardHeader = visArea.firstElementChild.firstElementChild;
+                    cardHeader.style.backgroundColor = tab_car_header_body;
+                    cardHeader.style.border = '1px solid' + tabs_area_border;
+
+                    let tabs_body = document.getElementsByClassName('tab-content');
+                    for(let i = 0; i<tabs_body.length; i++){
+                        tabs_body[i].style.backgroundColor = tab_car_header_body;
+                    }
+            }, 500)
+
+
             },
 
             //setup the dates for 'All Date' and for selectors of From and To
@@ -654,6 +747,7 @@
                     .data(data)
                     .enter().append("rect")
                     .attr("class", "bar")
+                    .style("fill", "#319bbe")
                     .attr("x", function(d) { return xScale(d.timestamp); })
                     .attr("width", xScale.bandwidth())
                     .attr("y", function(d) { return yScale(d.count); })
@@ -757,6 +851,9 @@
                 svg.append("path")
                     .data([data])
                     .attr("class", "line")
+                    .style("fill", "none")
+                    .style("stroke", "#0246cd")
+                    .style("stroke-width", "3")
                     .attr("d", valueline);
 
                 //  var xAxis_woy = d3.axisBottom(x).tickFormat(d3.timeFormat("Week %V"));
@@ -796,11 +893,6 @@
                     .attr("y", function(d) { return y(d.count) })
                     .attr("dy", "-5")
                     .text(function(d) {return d.count; });
-
-                svg.append('text')
-                    .attr('x', 10)
-                    .attr('y', -15)
-                    .text(this.actionType);
 
 
             },
@@ -1022,6 +1114,80 @@
 
             },
 
+            downloadPDF(){
+                html2canvas(document.querySelector('#lineChartVis')).then(canvas => {
+                    let pdf = new jsPDF('p', 'mm', 'a4');
+
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 211, 298);
+                    pdf.save("visualization");
+                });
+            },
+
+            print(chartSelected) {
+
+                let today = new Date();
+                let dd = String(today.getDate()).padStart(2, '0');
+                let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                let yyyy = today.getFullYear();
+                today = dd + '_' + mm + '_' + yyyy;
+
+                const filename  = 'Visualization_' + today;
+                let filenameUpdated = "";
+
+                let chartType = "";
+
+                const doc = new jsPDF('p', 'pt', 'a4', true);
+
+                let svg = "";
+                let svg_width = "";
+                let svg_height = "";
+
+                if(chartSelected === 'bar'){
+                    svg = document.getElementById('barChartVis');
+                    chartType = "Bar";
+                    filenameUpdated = filename + 'BarChart.pdf';
+
+                }else if(chartSelected === 'line'){
+                    svg =  document.getElementById('lineChartVis');
+                    chartType = "Line";
+                    filenameUpdated = filename + 'LineChart.pdf';
+                }else{
+                    svg = document.getElementById('pieChartVis');
+                    chartType = "Pie";
+                    filenameUpdated = filename + 'PieChart.pdf';
+                }
+
+                svg_width = svg.style.width / 2;
+                svg_height = svg.style.height / 2;
+
+                // 1. Keep a DOM reference to the SVG element
+                // let pie = document.getElementById('pieChartSVG');
+                //
+                // let bar_ser = new XMLSerializer().serializeToString(bar_svg)
+                //
+                // // 2. Serialize element into plain SVG
+                // let serializedSVG = new XMLSerializer().serializeToString(pie_svg);
+                //
+                // // 3. convert svg to base64
+                // let base64Data = window.btoa(serializedSVG);
+
+                //let bar = "data:image/svg+xml;base64," + bar_ser
+                //console.log(bar);
+
+
+                //add bar chart to the pdf
+                html2canvas(svg).then(canvas => {
+                    doc.text("Visualization", 10, 20);
+                    doc.text("Generated by " + this.currentUser.name, 10, 40);
+                    let barChart = canvas.toDataURL('image/png');
+                    doc.addImage(barChart, 'JPEG', 10, 60, svg_width, svg_height);
+                    doc.text(chartType + " Chart", 20, 400);
+                    doc.save(filenameUpdated);
+
+                });
+
+             },
+
             baseDashboardChanges(){
                 this.dateFrom= undefined;
                 this.dateTo= undefined;
@@ -1031,8 +1197,22 @@
 
                 this.keyAndValueSelectedDatesObjectsArray = [];
                 this.reducedObjectArrayForList = [];
-            }
 
+                this.themeChanger(
+                    "#e7e6e6",
+                    '#000000',
+                    '#ffffff',
+                    '#000000',
+                    '#efefef',
+                    '#000000',
+                    '#000000',
+                    "https://i.ibb.co/0MMPNK4/barchart-icon.png",
+                    "https://i.ibb.co/C8fpxfT/linechart-icon.png",
+                    "https://i.ibb.co/bzqNWb9/piechart-icon.png",
+                    'rgba(241,240,240,0.61)',
+                    '#e2e2e2');
+
+            }
         }
     }
     window.onbeforeunload = function(){
@@ -1074,37 +1254,42 @@
         /*height: 75vh !important;*/
     }
 
+    .border-right{
+        border-right: #ff9900 3px solid;
+    }
+
     #sidebarCloseBTN{
         position: absolute;
         top: 2em;
         right: 1em;
         width: 20%;
+        min-width: 150px;
     }
 
     /*
     Bar Chart Style
     */
-    .bar {
-        fill: #319bbe;
-    }
+    /*.bar {*/
+    /*    fill: #319bbe;*/
+    /*}*/
 
     /*
     line chart style
     */
-    .line {
-        fill: none;
-        stroke: #0246cd;
-        stroke-width: 3;
-    }
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-    .axis text {
-        font-size: 10px;
-    }
+    /*.line {*/
+    /*    fill: #F7F7F7;*/
+    /*    stroke: #0246cd;*/
+    /*    stroke-width: 3;*/
+    /*}*/
+    /*.axis path,*/
+    /*.axis line {*/
+    /*    fill: none;*/
+    /*    stroke: #000;*/
+    /*    shape-rendering: crispEdges;*/
+    /*}*/
+    /*.axis text {*/
+    /*    font-size: 10px;*/
+    /*}*/
 
     /*
     Pie Chart style
@@ -1150,7 +1335,7 @@
     }
 
     .visMainArea{
-        background-color: white;
+        /*background-color: white;*/
         max-width: 1920px;
         min-width: 1280px;
         min-height: 60vh;
