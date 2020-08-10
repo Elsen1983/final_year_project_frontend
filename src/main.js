@@ -7,9 +7,8 @@ import router from './router'
 import store from './store'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import VeeValidate from 'vee-validate'
-// import { ValidationProvider } from 'vee-validate/dist/vee-validate.full.esm'
-// import {ValidationObserver} from 'vee-validate'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
@@ -28,10 +27,10 @@ library.add(faTimes,
     faUserShield)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
-// Vue.component('ValidationProvider', ValidationProvider)
-// Vue.component('ValidationObserver', ValidationObserver)
 
 Vue.use(VeeValidate)
+Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 
 Vue.config.productionTip = false
 

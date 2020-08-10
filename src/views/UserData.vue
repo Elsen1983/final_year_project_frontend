@@ -1,13 +1,15 @@
 <template>
     <div class="container">
-        <header class="jumbotron">
-            <h1 class="display-3">
-                <strong>{{currentUser.name}}</strong>,
-                All User Data:
-            </h1>
+        <header class="jumbotron mt-4">
+            <h5 >
+                Welcome <strong>{{currentUser.name}}</strong>, for visualization please press the button below
+            </h5>
+            <b-button v-b-modal.modal-xl squared variant="success" class="mb-2 mt-2" size="lg" @click="baseDashboardChanges()">
+                <b-img width="40px" fluid src="../assets/analysis.png" alt="Image 1"></b-img> Open Client Dashboard
+            </b-button>
 
-            <b-button v-b-modal.modal-xl squared variant="success" class="mb-2" size="lg" @click="baseDashboardChanges()">
-                <b-img width="40px" fluid src="../assets/analysis.png" alt="Image 1"></b-img> Open Dashboard
+            <b-button v-if="currentUser.role==='ADMIN'" v-b-modal.modal-xl squared variant="success" class="mb-2 mt-2" size="lg" @click="baseDashboardChanges()">
+                <b-img width="40px" fluid src="../assets/analysis.png" alt="Image 1"></b-img> Open Admin Dashboard
             </b-button>
 
             <b-modal modal-class="modal-fullscreen" id="modal-xl" title="Client Dashboard" cancel-disabled ok-disabled hide-footer>
@@ -151,7 +153,7 @@
                                                 <b-row>
                                                     <b-col md="1"></b-col>
                                                     <b-col md="8">
-                                                        <b-button style="width: 720px; margin: 1em;" class="btn btn-warning btn-block" @click="print('bar')">Download</b-button>
+                                                        <b-button v-if="showDownloads===true" style="width: 720px; margin: 1em;" class="btn btn-warning btn-block downloadBTN" @click="print('bar')"><strong>Download to PDF</strong></b-button>
                                                     </b-col>
                                                     <b-col md="3"></b-col>
                                                 </b-row>
@@ -193,7 +195,7 @@
                                                 <b-row>
                                                     <b-col md="1"></b-col>
                                                     <b-col md="8">
-                                                        <b-button style="width: 720px; margin: 1em;" class="btn btn-warning btn-block" @click="print('line')">Download</b-button>
+                                                        <b-button v-if="showDownloads===true" style="width: 720px; margin: 1em;" class="btn btn-warning btn-block downloadBTN" @click="print('line')"><strong>Download to PDF</strong></b-button>
                                                     </b-col>
                                                     <b-col md="3"></b-col>
                                                 </b-row>
@@ -233,7 +235,7 @@
                                                 <b-row>
                                                     <b-col md="1"></b-col>
                                                     <b-col md="8">
-                                                        <b-button style="width: 720px; margin: 1em;" class="btn btn-warning btn-block" @click="print('pie')">Download</b-button>
+                                                        <b-button v-if="showDownloads===true" style="width: 640px; margin: 1em;" class="btn btn-warning btn-block downloadBTN" @click="print('pie')"><strong>Download to PDF</strong></b-button>
                                                     </b-col>
                                                     <b-col md="3"></b-col>
                                                 </b-row>
@@ -251,17 +253,14 @@
             </b-modal>
 
         </header>
-        <a @click="logOut" class="btn btn-link log-out">LogOut</a>
     </div>
 </template>
 <script>
     import UserService from '../services/user.service';
     import User from "../models/user";
-    // eslint-disable-next-line no-unused-vars
     import * as d3 from 'd3';
     import html2canvas from "html2canvas";
     import * as jsPDF from "jspdf";
-    //import canvg from 'canvg';
     export default {
         name: 'userdata',
         data() {
@@ -291,7 +290,8 @@
                 submit: '',
                 currentUserVisualizationData:[],
                 keyAndValueSelectedDatesObjectsArray:[],
-                reducedObjectArrayForList: []
+                reducedObjectArrayForList: [],
+                showDownloads: false
 
             };
         },
@@ -302,17 +302,6 @@
             if (!this.currentUser) {
                 this.$router.push('/login');
             }
-            this.currentUserBasicData = UserService.currentUserBasicDataValue;
-            //console.log(this.currentUserBasicData);
-
-            //logOut the user when refreshing a page
-            if(this.currentUserBasicData !== null) {
-                console.log("Setup all dates for selection");
-                this.setupAllDate();
-            }else{
-                this.logOut();
-            }
-
         },
         mounted() {
         },
@@ -576,16 +565,12 @@
             async submitSearch(){
                 this.currentUserVisualizationData.length=0;
 
-                // console.log("Current User: " + this.currentUser.username)
-                // console.log("Selected action: " + this.actionType)
-
                 await UserService.userVisualizationData(this.currentUser, this.actionType);
 
 
                 //compare the object arrays and find the same elements in both based on timestamp key
                 let result = UserService.currentUserVisualizationDataValue.filter(o1 => this.selectedObjectsBeforeActionTypeSelection.some(o2 => o1.timestamp === o2.timestamp));
                 //To get unique elements instead of the common ones, change the last line to let result = arr1.filter(o1 => !arr2.some(o2 => o1.id === o2.id)); to return the opposite value
-
 
                 this.calculateVisualizationData(result);
 
@@ -649,6 +634,13 @@
                 this.setupGraphsLineChart(this.reducedObjectArrayForList)
 
                 this.setupGraphsPieChart(this.reducedObjectArrayForList)
+
+                this.showDownloads = true;
+                // let downloadButtons = document.getElementsByClassName('downloadBTN');
+                // for(let i = 0; i<downloadButtons.length; i++){
+                //     downloadButtons[i].setAttribute("display", "block");
+                // }
+
             },
 
             clearSVGCharts(){
@@ -1114,15 +1106,7 @@
 
             },
 
-            downloadPDF(){
-                html2canvas(document.querySelector('#lineChartVis')).then(canvas => {
-                    let pdf = new jsPDF('p', 'mm', 'a4');
-
-                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 211, 298);
-                    pdf.save("visualization");
-                });
-            },
-
+            //save chart to pdf
             print(chartSelected) {
 
                 let today = new Date();
@@ -1188,7 +1172,32 @@
 
              },
 
-            baseDashboardChanges(){
+            async baseDashboardChanges(){
+
+                await UserService.userBasicData(this.currentUser).then(
+                    // eslint-disable-next-line no-unused-vars
+                    data => {
+                        //console.log(data);
+                        this.currentUserBasicData = UserService.currentUserBasicDataValue;
+
+                        //if server not responding (
+                        if(this.currentUserBasicData !== null) {
+                            console.log("Setup all dates for selection");
+                            this.setupAllDate();
+                        }else{
+                            this.logOut();
+                        }
+                    },
+                    error => {
+                        console.log(error);
+                        this.$store.dispatch('error', 'Username or password is not valid.');
+                        this.loading = false;
+                    }
+                );
+
+
+
+
                 this.dateFrom= undefined;
                 this.dateTo= undefined;
                 this.actionType = undefined;
@@ -1212,13 +1221,14 @@
                     'rgba(241,240,240,0.61)',
                     '#e2e2e2');
 
+                this.showDownloads = false;
             }
         }
     }
-    window.onbeforeunload = function(){
-        this.$router.push('/login')
-        return "Are you sure you want to close the window?";
-    }
+    // window.onbeforeunload = function(){
+    //     this.$router.push('/login')
+    //     return "Are you sure you want to close the window?";
+    // }
 </script>
 <style>
     #modal-xl{
@@ -1265,31 +1275,6 @@
         width: 20%;
         min-width: 150px;
     }
-
-    /*
-    Bar Chart Style
-    */
-    /*.bar {*/
-    /*    fill: #319bbe;*/
-    /*}*/
-
-    /*
-    line chart style
-    */
-    /*.line {*/
-    /*    fill: #F7F7F7;*/
-    /*    stroke: #0246cd;*/
-    /*    stroke-width: 3;*/
-    /*}*/
-    /*.axis path,*/
-    /*.axis line {*/
-    /*    fill: none;*/
-    /*    stroke: #000;*/
-    /*    shape-rendering: crispEdges;*/
-    /*}*/
-    /*.axis text {*/
-    /*    font-size: 10px;*/
-    /*}*/
 
     /*
     Pie Chart style
@@ -1381,8 +1366,6 @@
     }
 
     section {
-        /*padding: 1em;*/
-        /*border: 3px black solid;*/
         float: left;
     }
 
@@ -1390,4 +1373,7 @@
         margin: 1em;
     }
 
+    /*.downloadBTN{*/
+    /*    display: none;*/
+    /*}*/
 </style>

@@ -69,23 +69,31 @@ class UserService {
     userBasicData(user) {
         //console.log(user)
         const headers = {
-            authorization: 'Basic ' + btoa(user.username + ':' + user.password)
+            authorization: 'Bearer ' + user.token
         };
-        return axios.get(API_URL + 'basicdata?username=' + user.username, {headers: headers}).then(
+
+        return axios({
+            method: 'get',
+            url: API_URL + 'basicdata',
+            params: {
+                username: user.username
+            },
+            headers: headers
+        }).then(
             response => {
-                //console.log("userData -- response: " + JSON.stringify(response.data));
                 localStorage.setItem('currentUserBasicData', JSON.stringify(response.data));
                 currentUserBasicData.next(response.data);
-                console.log(currentUserBasicData)
 
             }
         );
+
+
     }
 
-    async userVisualizationData(user, validationType) {
+    userVisualizationData(user, validationType) {
 
         const headers = {
-            authorization: 'Basic ' + btoa(user.username + ':' + 'xilon1983')
+            authorization: 'Bearer ' + user.token
         };
 
         return axios({

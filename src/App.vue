@@ -32,7 +32,7 @@
                 </li>
                 <li class="nav-item">
                     <a v-on:click="logOut" class="nav-link">
-                        <font-awesome-icon icon="sign-out-alt"/> LogOut
+                        <b-icon icon="box-arrow-right" variant="warning"></b-icon> <span style="color: white">LogOut</span>
                     </a>
                 </li>
             </div>

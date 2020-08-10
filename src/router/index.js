@@ -8,7 +8,7 @@ import NotFound from '../views/Error_NotFound.vue'
 import Unauthorized from '../views/Error_Unauthorized.vue'
 import Role from '../models/role'
 import UserService from '../services/user.service'
-import UserAllData from "../views/UserAllData";
+import UserData from "../views/UserData";
 
 Vue.use(Router)
 
@@ -38,12 +38,12 @@ const router = new Router({
         },
         {
             path: '/userdata',
-            component: UserAllData,
+            component: UserData,
             meta: { roles: [Role.ADMIN, Role.USER] }
         },
         {
             path: '/basicdata/{username}',
-            component: UserAllData,
+            component: UserData,
             meta: { roles: [Role.ADMIN, Role.USER] }
         },
         //Only admin can see it.
