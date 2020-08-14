@@ -33,7 +33,6 @@ class UserService {
     }
 
     login(user) {
-        //console.log('Basic ' + btoa(user.username + ':' + user.password))
         //btoa: Basic64 encryption
         const headers = {
             authorization: 'Basic ' + btoa(user.username + ':' + user.password)
@@ -51,9 +50,13 @@ class UserService {
     logOut() {
         return axios.post(API_URL + "logout", {}).then(
             () => {
+                //simple user localStorage
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('currentUserBasicData');
                 localStorage.removeItem('currentUser_visualizationData');
+                //admin localStorage
+                localStorage.removeItem('dataByCalledType');
+
                 currentUserSubject.next(null);
                 currentUserBasicData.next(null);
                 currentUserVisualizationData.next(null);
@@ -96,20 +99,13 @@ class UserService {
             authorization: 'Bearer ' + user.token
         };
 
-        return axios({
-            method: 'get',
-            url: API_URL + 'visualization',
-            params: {
-                username: user.username,
-                type: validationType,
-            },
-            headers: headers
+        return axios({ method: 'get', url: API_URL + 'visualization',
+                        params: { username: user.username, type: validationType,},
+                        headers: headers
         }).then(
             response => {
-                console.log("userVisData -- response: " + JSON.stringify(response.data));
                 localStorage.setItem('currentUser_visualizationData', JSON.stringify(response.data));
                 currentUserVisualizationData.next(response.data);
-
             }
         );
     }

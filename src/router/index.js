@@ -9,6 +9,7 @@ import Unauthorized from '../views/Error_Unauthorized.vue'
 import Role from '../models/role'
 import UserService from '../services/user.service'
 import UserData from "../views/UserData";
+import AdminUsersList from "../views/AdminUsersList";
 
 Vue.use(Router)
 
@@ -48,18 +49,24 @@ const router = new Router({
         },
         //Only admin can see it.
         {
-            path: '/admin',
-            name: 'admin',
+            path: '/admindashboard',
+            name: 'admindashboard',
             // route level code-splitting
             // this generates a separate chunk (about.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
-            component: () => import('../views/Admin.vue'),
+            component: () => import('../views/AdminDashboard.vue'),
             meta: { roles: [Role.ADMIN] }
         },
         {
             path: '/detail/:id',
             name: 'detail',
             component: Detail,
+            meta: { roles: [Role.ADMIN] }
+        },
+        {
+            path: '/userslist',
+            name: 'userslist',
+            component: AdminUsersList,
             meta: { roles: [Role.ADMIN] }
         },
         //error pages are public

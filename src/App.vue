@@ -5,10 +5,17 @@
                 <img src="./assets/xmldation.png" width="30" height="30" class="d-inline-block align-top"/>
                 XMLdation
             </a>
+            <div class="navbar-nav ml-4">
+                <li class="nav-item" v-if="isAdmin">
+                    <a href="/userslist" class="nav-link">
+                        <font-awesome-icon icon="user-shield"/> Users List
+                    </a>
+                </li>
+            </div>
             <div class="navbar-nav mr-auto">
                 <li class="nav-item" v-if="isAdmin">
-                    <a href="/admin" class="nav-link">
-                        <font-awesome-icon icon="user-shield"/> Admin Panel
+                    <a href="/admindashboard" class="nav-link">
+                        <font-awesome-icon icon="user-shield"/> Admin Dashboard
                     </a>
                 </li>
             </div>
@@ -38,16 +45,14 @@
             </div>
         </nav>
 
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-6 offset-sm-3">
-                    <div v-if="alert.message" :class="alertStyle">
+
+                <div id="messageArea">
+                    <div style="width: 30vw; margin: auto;" v-if="alert.message" :class="alertStyle">
                         {{alert.message}}
                     </div>
                     <router-view></router-view>
                 </div>
-            </div>
-        </div>
+
     </div>
 </template>
 
@@ -111,13 +116,17 @@
 <style>
 
     body{
-        margin: 0;
+        margin: auto;
         padding: 0;
         height: 100vh;
+        width: 100vw;
+        /*min-width: 1280px;*/
+        /*min-height: 720px;*/
         /* min-height: 40vw; */
         background: url(assets/xmldation_background.png) bottom 0 right 0 no-repeat #4D4D4F;
         background-size: auto 75%;
         color: black;
+        overflow: hidden;
     }
 
     .navbar{
@@ -134,5 +143,10 @@
         color:#00A0C6;
         text-decoration:none;
         cursor:pointer;
+    }
+
+    #messageArea{
+        /*width: 30vw;*/
+        /*margin: auto;*/
     }
 </style>

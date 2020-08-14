@@ -26,6 +26,10 @@ library.add(faTimes,
     faSignOutAlt,
     faUserShield)
 
+import { Laue } from 'laue';
+
+Vue.use(Laue)
+
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.use(VeeValidate)

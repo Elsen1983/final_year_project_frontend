@@ -7,8 +7,8 @@
             <b-button v-b-modal.modal-xl squared variant="success" class="mb-2 mt-2" size="lg" @click="baseDashboardChanges()">
                 <b-img width="40px" fluid src="../assets/analysis.png" alt="Image 1"></b-img> Open Client Dashboard
             </b-button>
-
-            <b-button v-if="currentUser.role==='ADMIN'" v-b-modal.modal-xl squared variant="success" class="mb-2 mt-2" size="lg" @click="baseDashboardChanges()">
+            <br>
+            <b-button v-if="currentUser.role==='ADMIN'" v-b-modal.modal-xl squared variant="success" class="mb-2 mt-2" size="lg" @click="callAdminDashboard()">
                 <b-img width="40px" fluid src="../assets/analysis.png" alt="Image 1"></b-img> Open Admin Dashboard
             </b-button>
 
@@ -288,6 +288,7 @@
                 selectedObjectsAfterSearch: [],
                 //submit
                 submit: '',
+
                 currentUserVisualizationData:[],
                 keyAndValueSelectedDatesObjectsArray:[],
                 reducedObjectArrayForList: [],
@@ -619,8 +620,7 @@
                 }
 
                 //time to close sidebar
-
-                console.log(this.keyAndValueSelectedDatesObjectsArray)
+                //console.log(this.keyAndValueSelectedDatesObjectsArray)
 
                 let data = [...this.keyAndValueSelectedDatesObjectsArray];
 
@@ -636,10 +636,6 @@
                 this.setupGraphsPieChart(this.reducedObjectArrayForList)
 
                 this.showDownloads = true;
-                // let downloadButtons = document.getElementsByClassName('downloadBTN');
-                // for(let i = 0; i<downloadButtons.length; i++){
-                //     downloadButtons[i].setAttribute("display", "block");
-                // }
 
             },
 
@@ -1180,7 +1176,7 @@
                         //console.log(data);
                         this.currentUserBasicData = UserService.currentUserBasicDataValue;
 
-                        //if server not responding (
+                        //if server responding (
                         if(this.currentUserBasicData !== null) {
                             console.log("Setup all dates for selection");
                             this.setupAllDate();
@@ -1222,13 +1218,15 @@
                     '#e2e2e2');
 
                 this.showDownloads = false;
+            },
+
+            callAdminDashboard(){
+                this.$router.push('/admindashboard');
+
             }
         }
     }
-    // window.onbeforeunload = function(){
-    //     this.$router.push('/login')
-    //     return "Are you sure you want to close the window?";
-    // }
+
 </script>
 <style>
     #modal-xl{

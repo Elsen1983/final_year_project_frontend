@@ -9,7 +9,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body usersContainer">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -41,7 +41,7 @@
 <script>
     import AdminService from '../services/admin.service';
     export default {
-        name: 'admin',
+        name: 'userslist',
         data() {
             return {
                 userList: []
@@ -61,4 +61,9 @@
     }
 </script>
 <style>
+    .usersContainer{
+        overflow-y:scroll;
+        -webkit-overflow-scrolling: touch;
+        max-height: 60vh;
+    }
 </style>
