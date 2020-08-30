@@ -33,7 +33,6 @@
                     <b-card no-body class="mt-0">
                         <!-- Tabs container (card) -->
                         <b-tabs card>
-
                             <b-tabs
                                     active-nav-item-class="font-weight-bold text-uppercase text-danger"
                                     active-tab-class="font-weight-bold text-dark"
@@ -45,7 +44,7 @@
                                     <template v-slot:title id="graphsTab">
                                         <b-img id="barChartIcon" width="40px" fluid
                                                src="../assets/barchart_icon_white.png" alt="Image 1"></b-img>
-                                        <strong>Graph based Visualization</strong>
+                                        <strong style="color: black">Graph based Visualization</strong>
                                     </template>
 
                                     <b-row class="mt-0 pt-0 pb-1" style="padding-left: 2vmax; padding-right: 2vmax;">
@@ -71,13 +70,13 @@
                                     </b-row>
                                     <b-row style="padding-left: 2vmax; padding-right: 2vmax; text-align:left;">
                                         <b-col md="1"></b-col>
-                                        <b-col md="1"><b-button variant="primary" @click="changeChart('bar', reducedObjectArrayForList)">Bar Chart</b-button></b-col>
-                                        <b-col md="1"><b-button variant="primary" @click="changeChart('line',reducedObjectArrayForList)" >Line Chart</b-button></b-col>
-                                        <b-col md="1"><b-button variant="primary" @click="changeChart('pie', reducedObjectArrayForList)" >Pie Chart</b-button></b-col>
+                                        <b-col md="1"><b-button variant="primary" class="chartButtons" disabled @click="changeChart('bar', reducedObjectArrayForCharts)">Bar Chart</b-button></b-col>
+                                        <b-col md="1"><b-button variant="primary" class="chartButtons" disabled @click="changeChart('line',reducedObjectArrayForCharts)" >Line Chart</b-button></b-col>
+                                        <b-col md="1"><b-button variant="primary" class="chartButtons" disabled @click="changeChart('pie', reducedObjectArrayForCharts)" >Pie Chart</b-button></b-col>
                                         <b-col md="8"></b-col>
                                     </b-row>
 
-                                    <b-row>
+                                    <b-row id="lastRow">
                                         <b-col md="1"></b-col>
                                         <b-col md="8" id="chartsArea">
                                             <b-card id="visualizationMainArea " class="visualizationMainArea "
@@ -114,7 +113,7 @@
                                                     on it.
                                                 </b-card-text>
                                                 <b-card-header header-tag="header" class="p-1" role="tab"
-                                                               v-for="(item, idx) in reducedObjectArrayForList"
+                                                               v-for="(item, idx) in reducedObjectArrayForCharts"
                                                                :key="idx">
                                                     <b-button block v-b-toggle="'accordion-' + idx" variant="info">
                                                         {{item.timestamp}}
@@ -135,13 +134,23 @@
                                         </b-col>
                                         <b-col md="1"></b-col>
                                     </b-row>
+                                    <b-row>
+                                        <b-col md="1"></b-col>
+                                        <b-col md="10">
+                                            <b-button v-if="showDownloads===true" style="width: 720px; margin: 1em;"
+                                                      class="btn btn-warning btn-block downloadBTN"
+                                                      @click="print('line')"><strong>Download to PDF</strong>
+                                            </b-button>
+                                        </b-col>
+                                        <b-col md="3"></b-col>
+                                    </b-row>
                                 </b-tab>
                                 <!-- Tab 2 - Tables-->
                                 <b-tab id="tabTwo">
                                     <template v-slot:title class="tableTab">
                                         <b-img id="lineChartIcon" width="40px" fluid
                                                src="../assets/linechart_icon_white.png" alt="Image 1"></b-img>
-                                        <strong>Table based Visualization</strong>
+                                        <strong style="color: black">Table based Visualization</strong>
                                     </template>
                                     <b-card class="visMainArea justify-content-md-center text-center"
                                             align-v="center">
@@ -153,20 +162,32 @@
                                                     <b-img fluid src="../assets/datavisualization.png"
                                                            alt="Image 1"></b-img>
                                                 </section>
+                                                <div id="tableVis">
+                                                    <vue-good-table
+                                                            :columns="columns"
+                                                            :rows="rows"
+                                                            :pagination-options="{
+                                                                enabled: true,
+                                                                mode: 'pages',
+                                                                position: 'top'
+                                                            }"
+                                                            theme="black-rhino"
+                                                            styleClass="vgt-table condensed bordered"
+                                                            max-height="60vh"
+                                                    >
+<!--                                                    <div slot="table-actions-bottom">-->
+<!--                                                        <b-button v-if="showDownloads === true" style="width: 720px; margin: 1em;"-->
+<!--                                                                  class="btn btn-warning btn-block downloadBTN"-->
+<!--                                                                  @click="print('table')"><strong>Download to PDF</strong>-->
+<!--                                                        </b-button>-->
+<!--                                                    </div>-->
+                                                    </vue-good-table>
+                                                </div>
                                             </b-col>
                                             <b-col md="1">
                                             </b-col>
                                         </b-row>
-                                        <b-row>
-                                            <b-col md="1"></b-col>
-                                            <b-col md="10">
-                                                <b-button v-if="showDownloads===true" style="width: 720px; margin: 1em;"
-                                                          class="btn btn-warning btn-block downloadBTN"
-                                                          @click="print('line')"><strong>Download to PDF</strong>
-                                                </b-button>
-                                            </b-col>
-                                            <b-col md="3"></b-col>
-                                        </b-row>
+
                                     </b-card>
                                 </b-tab>
                             </b-tabs>
@@ -284,6 +305,10 @@
     // eslint-disable-next-line no-unused-vars
     import { Cartesian, Line, Bar, Polar, Pie, XAxis, YAxis } from 'laue'
 
+    // import the styles
+    import 'vue-good-table/dist/vue-good-table.css'
+    import { VueGoodTable } from 'vue-good-table';
+
     export default {
         name: 'admindashboard',
         components: {
@@ -291,7 +316,8 @@
             LaLine: Line,
             LaBar: Bar,
             LaPolar: Polar,
-            LaPie: Pie
+            LaPie: Pie,
+            VueGoodTable
         },
         data() {
             return {
@@ -324,11 +350,22 @@
                 submit: '',
 
 
-                reducedObjectArrayForList: [],
+                reducedObjectArrayForCharts: [],
                 dataforCharts: [],
                 showDownloads: false,
 
-                keyAndValueSelectedDatesObjectsArray: []
+                keyAndValueSelectedDatesObjectsArray: [],
+
+
+                columns: [],
+                rows: [
+                    // { id:1, name:"John", age: 20, createdAt: '',score: 0.03343 },
+                    // { id:2, name:"Jane", age: 24, createdAt: '2011-10-31', score: 0.03343 },
+                    // { id:3, name:"Susan", age: 16, createdAt: '2011-10-30', score: 0.03343 },
+                    // { id:4, name:"Chris", age: 55, createdAt: '2011-10-11', score: 0.03343 },
+                    // { id:5, name:"Dan", age: 40, createdAt: '2011-10-21', score: 0.03343 },
+                    // { id:6, name:"John", age: 20, createdAt: '2011-10-31', score: 0.03343 },
+                ],
 
             };
         },
@@ -386,7 +423,7 @@
                 this.themeSelector = undefined;
 
                 this.keyAndValueSelectedDatesObjectsArray = [];
-                this.reducedObjectArrayForList = [];
+                this.reducedObjectArrayForCharts = [];
 
                 this.themeChanger(
                     "#e7e6e6",
@@ -687,7 +724,50 @@
                     });
                 });
 
+                this.setupTableVisualization(selectedObjects);
+
                 this.calculateVisualizationData(selectedObjects)
+
+            },
+
+            setupTableVisualization(incomeData){
+                let columnsSetUp = [];
+                let rowsSetUp = [];
+
+                Object.entries(incomeData[1]).forEach(([key, value]) => {
+                    console.log(key + ' - ' + value)
+
+                    let keyAndValueObjectForColumns = {};
+
+                    keyAndValueObjectForColumns.label = jsUcfirst(key.toString());
+                    keyAndValueObjectForColumns.field = key.toString();
+                    keyAndValueObjectForColumns.type = typeof(value);
+
+                    columnsSetUp.push(keyAndValueObjectForColumns);
+
+                });
+
+
+                incomeData.forEach(obj => {
+                    let keyAndValueObjectForRows = {};
+                    //let counter = 0;
+                    Object.entries(obj).forEach(([key, value]) => {
+                        //counter++;
+                       //keyAndValueObjectForRows.id = counter;
+                        keyAndValueObjectForRows[key] = value;
+                    });
+                    rowsSetUp.push(keyAndValueObjectForRows);
+                });
+
+                this.columns = [...columnsSetUp];
+                this.rows = [...rowsSetUp];
+
+                function jsUcfirst(string) {
+                    return string.charAt(0).toUpperCase() + string.slice(1);
+
+                }
+
+                document.getElementById('tableChartVis').style.display = 'none';
             },
 
             calculateVisualizationData(resultObjectsArray){
@@ -716,11 +796,19 @@
                         }
                     }
                 }
-                this.dataforCharts = [...this.keyAndValueSelectedDatesObjectsArray];
+
                 //reduce the dataset with key 'count' where value is 0
-                this.reducedObjectArrayForList = [...this.dataforCharts].filter(function(e) { return e.count !== 0; });
-                //when data ready make some changes on UI
+                this.reducedObjectArrayForCharts = this.keyAndValueSelectedDatesObjectsArray.map(o => ({...o})).filter(function(e) { return e.count !== 0; });
+
                 this.clearSVGCharts();
+
+                let chartBTNs = document.getElementsByClassName("chartButtons");
+
+                [].forEach.call(chartBTNs, function (el) {
+                    el.removeAttribute('disabled');
+                });
+
+
             },
 
             //------------------------------------------------------------------------------
@@ -746,7 +834,7 @@
                     this.showDownloads = true;
 
                 }
-                if(text === 'line'){
+                if(text === 'pie'){
                     this.clearSVGCharts();
                     this.setupGraphsPieChart(chartData)
                     this.showDownloads = true;
@@ -756,23 +844,19 @@
 
             clearSVGCharts(){
                 let chart = document.getElementById("chartArea");
-                //let lineChart = document.getElementById("lineChartVis");
-                //let pieChart = document.getElementById("pieChartVis");
 
                 if(chart.hasChildNodes() ===true){
                     chart.removeChild(chart.childNodes[0]);
                 }
-                // if(lineChart.hasChildNodes() ===true){
-                //     lineChart.removeChild(lineChart.childNodes[0]);
-                // }
-                // if(pieChart.hasChildNodes() ===true){
-                //     pieChart.removeChild(pieChart.childNodes[0]);
-                // }
+
+                this.showDownloads = false;
             },
 
 
             // --- Bar Chart ---
-            setupGraphsBarChart(data){
+            setupGraphsBarChart(dataincome){
+
+                let data = dataincome.map(o => ({...o}));
                 //console.log('BarChart incoming data:' + data);
                 let maxcount = 0;
                 for(let i=0; i<data.length; i++){
@@ -870,8 +954,9 @@
             },
 
             // --- Line Chart ---
-            setupGraphsLineChart(data){
+            setupGraphsLineChart(dataincome){
 
+                let data = dataincome.map(o => ({...o}));
                 console.log('BarChart incoming data:' + data);
 
                 for(let i =0; i<data.length; i++){
@@ -1001,7 +1086,9 @@
             },
 
             // --- Pie Chart ---
-            setupGraphsPieChart(dataset){
+            setupGraphsPieChart(dataincome){
+
+                let dataset = dataincome.map(o => ({...o}));
                 // chart dimensions
                 let margin = {top: 40, right: 40, bottom: 40, left: 40};
                 let width = 800 - margin.left - margin.right;
@@ -1108,9 +1195,12 @@
                     // creates a smooth animation for each track
                     .each(function(d) { this._current - d; });
 
+                let cont = svg.append("g")
+                    .attr("id", "cont")
+                    .style("overflow", "scroll")
 
                 // define legend
-                let legend = svg
+                let legend = cont
                     // selecting elements with class 'legend'
                     .selectAll('.legend')
                     // refers to an array of labels from our dataset
@@ -1204,7 +1294,7 @@
                     .attr('x', legendRectSize + legendSpacing)
                     .attr('y', legendRectSize - legendSpacing)
                     // return label
-                    .text(function(d) { return d.toLocaleDateString(); });
+                    .text(function(d) { return d; });
 
                 this.onResize();
 
@@ -1328,5 +1418,13 @@
 
     .smallChart:hover{
 
+    }
+
+    #lastRow{
+        min-height: 70vh;
+    }
+
+    #visualizationMainArea{
+        min-height: 30vh;
     }
 </style>

@@ -27,7 +27,7 @@
                     <label>Password</label>
                     <input type="password" class="form-control"
                            name="password" v-model="user.password"
-                           v-validate="required"/>
+                           v-validate="'required'"/>
                     <div class="alert alert-danger" role="alert"
                          v-if="this.errors.has('password')">
                         Password is required.
@@ -71,6 +71,7 @@
                     this.loading = false;
                     return;
                 }
+                if(this.loading === true){
                 UserService.register(this.user).then(
                     data => {
                         //You can get warning (error: 'data' is defined but never used;), if you don't use parameters;
@@ -93,6 +94,7 @@
                     .then(()=> {
                         this.loading = false;
                     });
+                }
             }
         }
     }
